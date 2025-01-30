@@ -1,12 +1,24 @@
 {
     "[python]": {
-        "editor.defaultFormatter": "charliermarsh.ruff",
-        "editor.codeActionsOnSave": {
-            "source.organizeImports": "never",
-            "source.sortImports": "explicit",
-            "source.fixAll": "explicit"
-        }
+        "editor.defaultFormatter": "charliermarsh.ruff"
     },
+    "ruff.lint.args": [
+        "--fix"
+    ], // Enable auto-fixing
+    "ruff.lint.select": [
+        "I"
+    ], // Enable import sorting (I = isort rule)
+    "ruff.lint.ignore": [
+        "F401"
+    ], // Ignore "unused import" errors (F401)
+    // {
+    //     "editor.defaultFormatter": "charliermarsh.ruff",
+    //     "editor.codeActionsOnSave": {
+    //         "source.organizeImports": "never",
+    //         "source.sortImports": "explicit",
+    //         "source.fixAll": "explicit"
+    //     }
+    // },
     "python.testing.pytestArgs": [
         "tests"
     ],
