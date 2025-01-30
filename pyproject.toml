@@ -18,6 +18,7 @@ dev = [
     "pre-commit>=4.1.0",
     "pytest-cov>=6.0.0",
     "pytest>=8.3.4",
+    "faker>=35.0.0",
 ]
 
 [project.scripts]
