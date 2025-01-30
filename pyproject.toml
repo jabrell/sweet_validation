@@ -44,4 +44,7 @@ ignore = [
     "W191",  # indentation contains tabs
 ]
 
+[tool.my-py]
+strict = true
+
 
