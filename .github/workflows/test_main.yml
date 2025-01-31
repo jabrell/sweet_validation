@@ -39,5 +39,5 @@ jobs:
           pyproject.toml
     - run: mkdir coverage
     - run: uv sync
-    - run: pytest --cov=src tests/
+    - run: pytest --cov=src
 
