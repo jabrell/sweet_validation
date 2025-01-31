@@ -40,6 +40,6 @@ jobs:
     - run: mkdir coverage
     - run: uv export --all-extras --no-hashes | awk '{print $1}' FS=' ;' > requirements.txt
     - run: pip install -r requirements.txt
-    - run: pytest --cov=src
+    - run: coverage run -m pytest
     - run: coverage report
 
