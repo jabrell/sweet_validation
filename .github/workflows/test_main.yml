@@ -40,5 +40,6 @@ jobs:
     - run: mkdir coverage
     - run: uv pip compile pyproject.toml -o requirements.txt
     - run: pip install -r requirements.txt
+    - run: pip install pytest pytest-cov faker
     - run: pytest --cov=src
 
