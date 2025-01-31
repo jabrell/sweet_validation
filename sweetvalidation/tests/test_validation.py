@@ -2,10 +2,16 @@ from faker import Faker
 
 from sweetvalidation.validation import validate_csv_file
 
-if __name__ == "__main__":
+tmp_dir = "./sweetvalidation/tests/_tmp/"
+
+
+def test_validate_csv():
     fake = Faker()
-    fn_scheme = "scheme.yaml"
-    fn_valid = "valid.csv"
+    import os
+
+    print(os.getcwd())
+    fn_scheme = tmp_dir + "scheme.yaml"
+    fn_valid = tmp_dir + "valid.csv"
     with open(fn_scheme, "w") as f:
         f.write("""
 fields:
@@ -20,9 +26,11 @@ fields:
         f.write("name,year,value\n")
         f.write(f"{fake.name()},{fake.year()},{fake.random_int()}\n")
         f.write(f"{fake.name()},{fake.year()},{fake.random_int()}\n")
+    assert validate_csv_file(fn_valid, fn_schema=fn_scheme)
 
+    # invalid file
     with open(fn_valid, "w") as f:
         f.write("name,year,value\n")
         f.write(f"{fake.name()},{fake.name()},{fake.random_int()}\n")
         f.write(f"{fake.name()},{fake.name()},{fake.random_int()}\n")
-    validate_csv_file(fn_valid, fn_scheme)
+    assert not validate_csv_file(fn_valid, fn_schema=fn_scheme)

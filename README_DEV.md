@@ -1,6 +1,6 @@
 # Environment setup
 
-We use [uv]() for dependency management. Use
+We use [uv](https://docs.astral.sh/uv/) for dependency management. Use
 
 ``
 uv sync
