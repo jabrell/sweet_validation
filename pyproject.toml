@@ -42,6 +42,8 @@ select = [
     "C4",  # flake8-comprehensions
     "UP",  # pyupgrade
 ]
+ignore = ["UP006"]  # Ignore "Use `type` instead of `Type`" warnings
+
 # ignore = [
 #     "E501",  # line too long, handled by black
 #     "B008",  # do not perform function calls in argument defaults
@@ -57,4 +59,10 @@ select = [
 [tool.my-py]
 strict = true
 
+
+[tool.coverage.run]
+omit = [
+  "*/__init__.py",  # Exclude all __init__.py files
+  # Add other patterns if needed, e.g., "*/.venv/*", "*/tests/*", etc.
+]
 
