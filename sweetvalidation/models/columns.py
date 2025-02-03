@@ -1,5 +1,5 @@
 from collections.abc import Iterable
-from typing import TypeVar
+from typing import Generic, TypeVar
 
 import numpy as np
 from pydantic import BaseModel, Field, model_validator
@@ -10,12 +10,34 @@ __all__ = ["BaseColumn"]
 T = TypeVar("T")
 
 
-class BaseColumn(BaseModel):
-    """A column is defined by its name, type, and a human-understandable
-       description of it. A column is assumed to one and exactly one type.
+class BaseColumn(BaseModel, Generic[T]):
+    """Columns are the basic building blocks of schemas. They behave like standard
+    Python lists but are type-checked and can have additional constraints. Each
+    column has exactly one type. In addition, columns must have a name and and
+    a description. The description should be human-understandable and also machine-
+    readable. Columns can be created with or without initial values.
 
-       A column behaves like a list that only allows a certain type and has
-       additional metadata.
+    In addition, BasicColumns can have the following constraints:
+
+    - allow_duplicates: If False, the column values must be unique. Default is False.
+    - allow_null: If False, the column values cannot be null. Default is False.
+        The null values can be set using the null_values attribute. By default,
+        null values are None, np.nan, and "". For now, pd.NA is not supported.
+
+    Example:
+
+    ```python
+    from sweetvalidation.models import BaseColumn
+    col = BaseColumn(
+        name="age",
+        ctype=int,
+        description="Age of the person",
+        items=[25, 30, 35],
+        allow_duplicates=True,
+        allow_null=False,
+        null_values=[None, np.nan]
+    )
+    ```
 
     Attributes:
         name (str): Name of the column
@@ -31,7 +53,7 @@ class BaseColumn(BaseModel):
     name: str
     ctype: type[T]
     description: str
-    items: list[T] | None = Field(default_factory=list)
+    items: list[T] = list[T]()
     allow_duplicates: bool = Field(frozen=True, default=False)
     allow_null: bool = Field(frozen=True, default=False)
     # TODO allow for pandas null values
@@ -97,16 +119,26 @@ class BaseColumn(BaseModel):
     def __delitem__(self, index):
         del self.items[index]
 
-    def __iter__(self) -> Iterable[T]:
+    def __iter__(self) -> Iterable[T]:  # type: ignore
+        # need to ignore type because of pydantic BaseModel implements __iter__
+        # to return the model's fields and is overwritten
         return iter(self.items)
 
-    def __contains__(self, item: type[T]) -> bool:
+    def __contains__(self, item: T) -> bool:
         return item in self.items
 
     def __len__(self) -> int:
         return len(self.items)
 
-    def append(self, item: type[T]) -> None:
+    def append(self, item: T) -> None:
+        """Append a value to the column
+
+        Args:
+            item (T): Value to be added to the column
+
+        Returns:
+            None
+        """
         self._check_null(item)
         self._check_type(item)
         if not self.allow_duplicates and item in self.items:
@@ -114,6 +146,14 @@ class BaseColumn(BaseModel):
         self.items.append(item)
 
     def extend(self, iterable: Iterable[T]) -> None:
+        """Extend the column with an iterable
+
+        Args:
+            iterable (Iterable): Values to be added to the column
+
+        Returns:
+            None
+        """
         for item in iterable:
             self._check_null(item)
             self._check_type(item)
