@@ -1,13 +1,15 @@
 from collections.abc import Iterable
-from typing import Generic, TypeVar
+from typing import Generic, Type, TypeVar, Union, get_args
 
 import numpy as np
 from pydantic import BaseModel, Field, model_validator
 
 from ..exceptions import DuplicatedValueError, RequiredValueError
 
-__all__ = ["BaseColumn"]
+__all__ = ["BaseColumn", "NumericBaseColumn"]
 T = TypeVar("T")
+NumericType = int | float
+N = TypeVar("N", bound=int | float)
 
 
 class BaseColumn(BaseModel, Generic[T]):
@@ -53,13 +55,22 @@ class BaseColumn(BaseModel, Generic[T]):
     """
 
     name: str
-    ctype: type[T]
+    ctype: Type[T]
     description: str
     items: list[T] = list[T]()
     allow_duplicates: bool = Field(frozen=True, default=False)
     allow_null: bool = Field(frozen=True, default=False)
     # TODO allow for pandas null values
     null_values: list = [None, np.nan, ""]
+
+    def __pre_init__(self):
+        type_args = get_args(self.__orig_bases__[0])
+        print(type_args)
+
+    def __post_init__(self):
+        type_args = get_args(self.__orig_bases__[0])
+        print(type_args)
+        self.ctype = type_args[0]
 
     @model_validator(mode="after")
     def validate_items(self):
@@ -84,7 +95,15 @@ class BaseColumn(BaseModel, Generic[T]):
         # exclude null values from type checking if allowed
         if self.allow_null and value in self.null_values:
             return
-        if not isinstance(value, self.ctype):
+        # Check if value is an instance of any of the types in the Union
+        if hasattr(self.ctype, "__origin__") and self.ctype.__origin__ is Union:
+            print("here")
+            for t in get_args(self.ctype):
+                if not isinstance(value, t):
+                    TypeError(f"Value must be of type {self.ctype.__name__}")
+        elif not isinstance(
+            value, self.ctype
+        ):  # If ctype is not a Union, check directly
             raise TypeError(f"Value must be of type {self.ctype.__name__}")
 
     def _check_null(self, value: T) -> None:
@@ -164,11 +183,41 @@ class BaseColumn(BaseModel, Generic[T]):
         self.items = new_items.copy()
 
 
-class IntegerColumn(BaseColumn[int]):
-    """A column that only allows integers."""
+class NumericBaseColumn(BaseColumn[int | float]):
+    """A column that only allows for numeric types.
 
-    minimum: int | None = None
-    maximum: int | None = None
+    Besides the constraints of a BaseColumn, NumericColumns have the following
+    additional constraints:
 
-    def __init__(self, name: str, description: str):
-        super().__init__(name=name, ctype=int, description=description)
+    - minimum: Minimum value allowed in the column
+    - maximum: Maximum value allowed in the column
+
+    """
+
+    minimum: int | float | None = None
+    maximum: int | float | None = None
+
+    def __post_init__(self):
+        super().__post_init__()
+
+    @model_validator(mode="after")
+    def validate_items(self):
+        super().validate_items()
+        self._check_min_max(self.items)
+        return self
+
+    def _check_min_max(self, iterable: Iterable[N]) -> None:
+        """Check if all values are within the min and max range
+
+        Args:
+            iterable (Iterable): Values to be checked
+
+        Raises:
+            ValueError: If the values are not within the min and max range
+        """
+        if self.minimum is not None:
+            if any(item < self.minimum for item in iterable):
+                raise ValueError(f"Values must be greater than {self.minimum}")
+        if self.maximum is not None:
+            if any(item > self.maximum for item in iterable):
+                raise ValueError(f"Values must be less than {self.maximum}")
