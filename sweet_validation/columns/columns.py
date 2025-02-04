@@ -1,5 +1,5 @@
 from collections.abc import Iterable
-from typing import Any, SupportsIndex
+from typing import Any
 
 from frictionless import Field, Report, Resource, Schema
 
@@ -8,30 +8,33 @@ from sweet_validation.exceptions import ValidationError
 __all__ = ["Column"]
 
 
-class Column(list):
+class Column:
     """A column is defined as a list of items and a frictionless Field object.
 
-    Columns behave like lists but the list is checked against the Field object.
+    Columns roughly behave like lists but is checked against the Field object.
 
     Attributes:
         field (Field): A frictionless Field object.
         items (list): A list of items.
     """
 
-    # field: Field
-    # items: list[Any] | None
+    _items: list[Any]
 
     def __init__(self, field: Field, items: list[Any] | None = None):
-        super().__init__()
         self.field = field
         if items:
             self._raise_on_validation(items=items)
-            super().extend(items)
+        self._items = items or []
 
     @property
     def items(self) -> list[Any]:
         """Return the items of the column."""
-        return [i for i in self]  # noqa
+        return self._items
+
+    @items.setter
+    def items(self, items: list[Any]) -> None:
+        """Set the items of the column."""
+        raise AttributeError("Cannot set the items of a column. Use append or extend")
 
     @property
     def name(self) -> str:
@@ -78,7 +81,7 @@ class Column(list):
         """
         new_items = self.items + [item]
         self._raise_on_validation(items=new_items)
-        super().append(item)
+        self._items = new_items
 
     def extend(self, items: Iterable[Any]) -> None:
         """Extend the column items with a list of items.
@@ -89,28 +92,9 @@ class Column(list):
         Raises:
             ValidationError: If the items are not valid.
         """
-        self._raise_on_validation(items=list(self.items) + list(items))
-        super().extend(items)
-
-    def insert(self, index: SupportsIndex, item: Any) -> None:
-        """Insert an item into the column items at a specific index.
-
-        Args:
-            index (int): The index to insert the item.
-            item (Any): The item to insert.
-
-        Raises:
-            ValidationError: If the item is not valid.
-        """
-        new_items = self.items[:index] + [item] + self.items[index:]
+        new_items = self.items + list(items)
         self._raise_on_validation(items=new_items)
-        super().insert(index, item)
-
-    def __add__(self, other: Iterable[Any]) -> "Column":
-        raise NotImplementedError("+ Operator not implemented for Column objects.")
-
-    def __iadd__(self, other: Iterable[Any]) -> "Column":
-        raise NotImplementedError("+ Operator not implemented for Column objects.")
+        self._items = new_items
 
     def _raise_on_validation(self, items: list[Any] | None = None) -> None:
         """Raise a ValidationError if the items are not valid.
@@ -146,3 +130,7 @@ class Column(list):
         items = items or self.items
         data = [[self.field.name]] + [[i] for i in items]
         return Resource(data=data, schema=Schema(fields=[self.field]))
+
+    def __len__(self) -> int:
+        """Returns the number of items"""
+        return len(self.items)

@@ -46,16 +46,6 @@ def test_expand():
         col.extend(["a", "b", "c"])
 
 
-def test_insert():
-    field = IntegerField(name="test")
-    items = [1, 2, 3]
-    col = Column(field=field, items=items)
-    col.insert(1, 4)
-    assert col.items == [1, 4, 2, 3]
-    with pytest.raises(ValidationError):
-        col.insert(1, "a")
-
-
 def test_getattr():
     field = IntegerField(name="test", description="A test column")
     items = [1, 2, 3]
@@ -91,13 +81,3 @@ def test_append():
     assert col.items == [1, 2, 3, 4]
     with pytest.raises(ValidationError):
         col.append("a")
-
-
-def test_add():
-    field = IntegerField(name="test")
-    items = [1, 2, 3]
-    col = Column(field=field, items=items)
-    with pytest.raises(NotImplementedError):
-        col + ["a"]
-    with pytest.raises(NotImplementedError):
-        col += ["a"]
