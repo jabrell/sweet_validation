@@ -32,6 +32,28 @@ def test_len():
     items = [1, 2, 3]
     col = Column(field=field, items=items)
     assert len(col) == 3
+    col.append(4)
+    assert len(col) == 4
+
+
+def test_expand():
+    field = IntegerField(name="test")
+    items = [1, 2, 3]
+    col = Column(field=field, items=items)
+    col.extend([4, 5, 6])
+    assert col.items == [1, 2, 3, 4, 5, 6]
+    with pytest.raises(ValidationError):
+        col.extend(["a", "b", "c"])
+
+
+def test_insert():
+    field = IntegerField(name="test")
+    items = [1, 2, 3]
+    col = Column(field=field, items=items)
+    col.insert(1, 4)
+    assert col.items == [1, 4, 2, 3]
+    with pytest.raises(ValidationError):
+        col.insert(1, "a")
 
 
 def test_getattr():
@@ -47,3 +69,35 @@ def test_getattr():
     assert col.field == field
     with pytest.raises(AttributeError):
         _ = col.not_an_attribute
+
+
+def test_set_attr():
+    field = IntegerField(name="test", description="A test column")
+    items = [1, 2, 3]
+    col = Column(field=field, items=items)
+    with pytest.raises(AttributeError):
+        col.name = "new_name"
+    with pytest.raises(AttributeError):
+        col.description = "new_description"
+    with pytest.raises(AttributeError):
+        col.type = "new_type"
+
+
+def test_append():
+    field = IntegerField(name="test")
+    items = [1, 2, 3]
+    col = Column(field=field, items=items)
+    col.append(4)
+    assert col.items == [1, 2, 3, 4]
+    with pytest.raises(ValidationError):
+        col.append("a")
+
+
+def test_add():
+    field = IntegerField(name="test")
+    items = [1, 2, 3]
+    col = Column(field=field, items=items)
+    with pytest.raises(NotImplementedError):
+        col + ["a"]
+    with pytest.raises(NotImplementedError):
+        col += ["a"]
