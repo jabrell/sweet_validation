@@ -13,6 +13,6 @@ def validate_csv_file(fn_csv: str, fn_schema: str) -> bool:
     Returns:
         bool: True if the CSV file is valid, False otherwise.
     """
-    r = Resource(fn_csv, schema=fn_schema)
+    r = Resource(source=fn_csv, schema=fn_schema)
     valid = r.validate()
     return valid.valid
