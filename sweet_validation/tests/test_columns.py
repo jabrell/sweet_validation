@@ -71,6 +71,8 @@ def test_set_attr():
         col.description = "new_description"
     with pytest.raises(AttributeError):
         col.type = "new_type"
+    with pytest.raises(AttributeError):
+        col.items = [1, 2, 3]
 
 
 def test_append():
@@ -81,3 +83,13 @@ def test_append():
     assert col.items == [1, 2, 3, 4]
     with pytest.raises(ValidationError):
         col.append("a")
+
+
+def test_replace():
+    field = IntegerField(name="test")
+    items = [1, 2, 3]
+    col = Column(field=field, items=items)
+    col.replace([1, 2])
+    assert col.items == [1, 2]
+    with pytest.raises(ValidationError):
+        col.replace(["a"])

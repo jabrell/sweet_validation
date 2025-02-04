@@ -1,7 +1,18 @@
 site_name: My Docs
 
-theme: readthedocs
+theme:
+  name: material
+
+nav:
+  - Home: index.md
+  - API: api.md
+
 plugins:
   - search
   - mkdocstrings:
-      default_handler: python
+      handlers:
+        python:
+          options:
+            show_source: true
+            show_root_heading: true
+

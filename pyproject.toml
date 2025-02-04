@@ -23,6 +23,7 @@ dev = [
     "faker>=35.0.0",
 ]
 docs = [
+    "mkdocs-material>=9.6.2",
     "mkdocs>=1.6.1",
     "mkdocstrings[python]>=0.27.0",
 ]

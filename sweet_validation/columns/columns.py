@@ -15,7 +15,36 @@ class Column:
 
     Attributes:
         field (Field): A frictionless Field object.
-        items (list): A list of items.
+        items (list): A list of items. It can only modified during instantiation,
+            or by using the append, extend, or replace methods.
+        name (str): The name of the column defined in the field object. Read-only.
+            It can be modified via the field object.
+        description (str): The description of the column defined in the field object.
+            Read-only. It can be modified via the field object.
+        type (str): The type of the column defined in the field object. Read-only.
+            It can be modified via the field object.
+
+    Raises:
+        ValidationError: If the items are not valid given the Field object.
+
+    The field object defines the type and constraints of the column and is based
+    on the frictionless.Field object. The items are validated against this field
+    every time they are appended or extended.
+
+    For more information on the Field object, see:
+    - [Field types](https://framework.frictionlessdata.io/docs/fields/any.html)
+        under "Data Fields"
+    - [Constraints](https://specs.frictionlessdata.io/table-schema/#constraints)
+    - [Table and Field Scheme standard](https://specs.frictionlessdata.io/table-schema/#constraints)
+
+    Examples:
+
+    ```python
+    from frictionless.fields import IntegerField
+    field=IntegerField(name="test", constraints={"minimum": 1, "maximum": 3})
+    col = Column(field=field, items=[1, 2, 3])
+    ```
+
     """
 
     _items: list[Any]
@@ -95,6 +124,18 @@ class Column:
         new_items = self.items + list(items)
         self._raise_on_validation(items=new_items)
         self._items = new_items
+
+    def replace(self, items: list[Any]) -> None:
+        """Replace the column items with a list of items.
+
+        Args:
+            items (list): A list of items to replace the column items.
+
+        Raises:
+            ValidationError: If the items are not valid.
+        """
+        self._raise_on_validation(items=items)
+        self._items = items
 
     def _raise_on_validation(self, items: list[Any] | None = None) -> None:
         """Raise a ValidationError if the items are not valid.
