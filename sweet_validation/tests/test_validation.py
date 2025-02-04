@@ -1,8 +1,8 @@
 from faker import Faker
 
-from sweetvalidation.validation import validate_csv_file
+from sweet_validation.validation import validate_csv_file
 
-tmp_dir = "./sweetvalidation/tests/_tmp/"
+tmp_dir = "./sweet_validation/tests/_tmp/"
 
 
 def test_validate_csv():

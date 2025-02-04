@@ -1,6 +1,6 @@
 from faker import Faker
 
-from sweetvalidation.validation import validate_csv_file
+from sweet_validation.validation import validate_csv_file
 
 if __name__ == "__main__":
     fake = Faker()

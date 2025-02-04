@@ -1,8 +1,8 @@
 import numpy as np
 import pytest
 
-from sweetvalidation.models import BaseColumn
-from sweetvalidation.models.exceptions import DuplicatedValueError, RequiredValueError
+from sweet_validation.models import BaseColumn
+from sweet_validation.models.exceptions import DuplicatedValueError, RequiredValueError
 
 
 def test_column_create():

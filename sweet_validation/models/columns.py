@@ -41,6 +41,7 @@ class BaseColumn(BaseModel, Generic[T]):
 
     Attributes:
         name (str): Name of the column
+        items (list): List of values in the column
         ctype (Any): Type of the values in the column
         description (str): Description of the column content
         allow_duplicates (bool): Whether the column values are allowed to contain
@@ -48,6 +49,7 @@ class BaseColumn(BaseModel, Generic[T]):
             duplicates.
         allow_null (bool): Whether null values are allowed in the column
         null_values (list): List of values that are considered null
+            Default: [None, np.nan, ""]
     """
 
     name: str
@@ -162,7 +164,7 @@ class BaseColumn(BaseModel, Generic[T]):
         self.items = new_items.copy()
 
 
-class IntegerColumn(BaseColumn):
+class IntegerColumn(BaseColumn[int]):
     """A column that only allows integers."""
 
     minimum: int | None = None
