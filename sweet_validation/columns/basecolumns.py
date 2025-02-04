@@ -4,7 +4,7 @@ from typing import Generic, TypeVar
 import numpy as np
 from pydantic import BaseModel, Field, model_validator
 
-from .exceptions import DuplicatedValueError, RequiredValueError
+from ..exceptions import DuplicatedValueError, RequiredValueError
 
 __all__ = ["BaseColumn"]
 T = TypeVar("T")
