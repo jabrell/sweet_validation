@@ -1,3 +1,9 @@
+"""
+TODO: delete me
+That is only for testing and playing around with the frictionless library.
+should be deleted later on.
+"""
+
 from faker import Faker
 
 from sweet_validation.validation import validate_csv_file
