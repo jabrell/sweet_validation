@@ -66,7 +66,7 @@ class Column:
         raise AttributeError("Cannot set the items of a column. Use append or extend")
 
     @property
-    def name(self) -> str:
+    def name(self) -> Any:
         """Return the name of the column defined in the field object"""
         return self.field.name
 
@@ -77,7 +77,7 @@ class Column:
         )
 
     @property
-    def description(self) -> str | None:
+    def description(self) -> Any:
         """Return the description of the column defined in the field object"""
         return self.field.description
 
@@ -88,7 +88,7 @@ class Column:
         )
 
     @property
-    def type(self) -> str:
+    def type(self) -> Any:
         """Return the type of the column defined in the field object"""
         return self.field.type
 
