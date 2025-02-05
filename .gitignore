@@ -4,6 +4,7 @@ __pycache__/
 *$py.class
 # only needed for explorations
 _jab_*
+/_tmp*
 
 # C extensions
 *.so
