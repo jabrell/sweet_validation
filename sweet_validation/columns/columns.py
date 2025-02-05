@@ -1,31 +1,38 @@
-from collections.abc import Iterable
 from typing import Any
 
 from frictionless import Field, Report, Resource, Schema
 
 from sweet_validation.exceptions import ValidationError
 
+from .validated_items import ValidatedItems
+
 __all__ = ["Column"]
 
 
-class Column:
+class Column(ValidatedItems):
     """A column is defined as a list of items and a frictionless Field object.
 
     Columns roughly behave like lists but is checked against the Field object.
 
     Attributes:
         field (Field): A frictionless Field object.
-        items (list): A list of items. It can only modified during instantiation,
-            or by using the append, extend, or replace methods.
-        name (str): The name of the column defined in the field object. Read-only.
-            It can be modified via the field object.
-        description (str): The description of the column defined in the field object.
-            Read-only. It can be modified via the field object.
-        type (str): The type of the column defined in the field object. Read-only.
-            It can be modified via the field object.
+            The field object defines the type and constraints of the column.
+            It can only be modified during instantiation. Otherwise it is
+            immutable.
+        items (list): A list of items. The items are validated against the field object.
+            items are immutable and can only be set during instantiation or by
+            replacing the items (e.g., col.items = [1, 2, 3]) which triggers
+            a validation check.
+
+    Methods:
+        is_valid: Raise a ValidationError if the items are not valid. It can also
+            be used to validate a list of items against the Field object.
+        validate_items: Validate a list of items against the Field object.
+        get_resource: Return a frictionless Resource object with the column items.
 
     Raises:
         ValidationError: If the items are not valid given the Field object.
+        AttributeError: If the fields are modified after instantiation.
 
     The field object defines the type and constraints of the column and is based
     on the frictionless.Field object. The items are validated against this field
@@ -39,109 +46,61 @@ class Column:
 
     Examples:
 
-    ```python
-    from frictionless.fields import IntegerField
-    field=IntegerField(name="test", constraints={"minimum": 1, "maximum": 3})
-    col = Column(field=field, items=[1, 2, 3])
-    ```
+        ```python
+        from frictionless.fields import IntegerField
+        field = IntegerField(name="test", constraints={"minimum": 1, "maximum": 3})
+        col = Column(field=field, items=[1, 2, 3])
+        ```
+
+        The field property is immutable and items can only be replaced by a new list.
+        That means that you always receive a copy of items and fields and modifying
+        these copies will not affect the original column.
+
+        ```python
+        from frictionless.fields import IntegerField
+        field = IntegerField(name="test")
+        col = Column(field=field, items=[1, 2, 3])
+        print(col.items)  # returns [1, 2, 3]
+        new_items = col.items
+        new_items.append(4)
+        print(col.items)  # still returns [1, 2, 3]
+        col.items = new_items
+        print(col.items)  # returns [1, 2, 3, 4]
+        new_field = IntegerField(name="another_test") # raises AttributeError
+        ```
 
     """
 
     _items: list[Any]
+    _field: Field
 
     def __init__(self, field: Field, items: list[Any] | None = None):
-        self.field = field
-        if items:
-            self._raise_on_validation(items=items)
-        self._items = items or []
+        # first assign the field so the validation can be done, then call parent class
+        self._field = field
+        super().__init__(items=items)
 
     @property
-    def items(self) -> list[Any]:
-        """Return the items of the column."""
-        return self._items
+    def field(self) -> Field:
+        """Return the field object of the column."""
+        return self._field
 
-    @items.setter
-    def items(self, items: list[Any]) -> None:
-        """Set the items of the column."""
-        raise AttributeError("Cannot set the items of a column. Use append or extend")
+    @field.setter
+    def field(self, field: Field) -> None:
+        """Set the field object of the column."""
+        raise AttributeError("Cannot reset the field. Create a new column instead.")
 
-    @property
-    def name(self) -> Any:
-        """Return the name of the column defined in the field object"""
-        return self.field.name
-
-    @name.setter
-    def name(self, name: str) -> None:
-        raise AttributeError(
-            "Cannot set the name of a column. Set the name of the field object instead."
-        )
-
-    @property
-    def description(self) -> Any:
-        """Return the description of the column defined in the field object"""
-        return self.field.description
-
-    @description.setter
-    def description(self, description: str) -> None:
-        raise AttributeError(
-            "Cannot set the description of a column. Set the description of the field object instead."  # noqa
-        )
-
-    @property
-    def type(self) -> Any:
-        """Return the type of the column defined in the field object"""
-        return self.field.type
-
-    @type.setter
-    def type(self, type: str) -> None:
-        """Set the type of the column defined in the field object"""
-        raise AttributeError(
-            "Cannot set the type of a column. Set the type of the field object instead."
-        )
-
-    def append(self, item: Any) -> None:
-        """Append an item to the column items.
-
-        Args:
-            item (Any): An item to append to the column items.
-
-        Raises:
-            ValidationError: If the item is not valid.
-        """
-        new_items = self.items + [item]
-        self._raise_on_validation(items=new_items)
-        self._items = new_items
-
-    def extend(self, items: Iterable[Any]) -> None:
-        """Extend the column items with a list of items.
-
-        Args:
-            items (list): A list of items to extend the column items.
-
-        Raises:
-            ValidationError: If the items are not valid.
-        """
-        new_items = self.items + list(items)
-        self._raise_on_validation(items=new_items)
-        self._items = new_items
-
-    def replace(self, items: list[Any]) -> None:
-        """Replace the column items with a list of items.
-
-        Args:
-            items (list): A list of items to replace the column items.
-
-        Raises:
-            ValidationError: If the items are not valid.
-        """
-        self._raise_on_validation(items=items)
-        self._items = items
-
-    def _raise_on_validation(self, items: list[Any] | None = None) -> None:
+    def is_valid(
+        self, items: list[Any] | None = None, raise_exception: bool = True
+    ) -> bool:
         """Raise a ValidationError if the items are not valid.
 
         Args:
             items (list): A list of items. If None, the column items are used.
+            raise_exception (bool): If True, raise a ValidationError if the items
+                are not valid. If False returns False if validation fails.
+
+        Returns:
+            bool: True if the items are valid.
 
         Raises:
             ValidationError: If the items are not valid.
@@ -149,7 +108,10 @@ class Column:
         items = items or self.items
         rep = self.validate_items(items=items)
         if not rep.valid:
-            raise ValidationError(report=rep)
+            if raise_exception:
+                raise ValidationError(report=rep)
+            return False
+        return True
 
     def validate_items(self, items: list[Any] | None = None) -> Report:
         """Validate a list of items against the Field object.
@@ -171,7 +133,3 @@ class Column:
         items = items or self.items
         data = [[self.field.name]] + [[i] for i in items]
         return Resource(data=data, schema=Schema(fields=[self.field]))
-
-    def __len__(self) -> int:
-        """Returns the number of items"""
-        return len(self.items)

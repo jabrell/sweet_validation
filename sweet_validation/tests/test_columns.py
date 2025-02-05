@@ -27,69 +27,31 @@ def test_init_constraints():
         _ = Column(field=field, items=items)
 
 
-def test_len():
+def test_immutable_field():
     field = IntegerField(name="test")
     items = [1, 2, 3]
     col = Column(field=field, items=items)
-    assert len(col) == 3
-    col.append(4)
-    assert len(col) == 4
+    with pytest.raises(AttributeError):
+        col.field = IntegerField(name="another_test")
 
 
-def test_expand():
+def test_immutable_items():
     field = IntegerField(name="test")
     items = [1, 2, 3]
     col = Column(field=field, items=items)
-    col.extend([4, 5, 6])
-    assert col.items == [1, 2, 3, 4, 5, 6]
-    with pytest.raises(ValidationError):
-        col.extend(["a", "b", "c"])
-
-
-def test_getattr():
-    field = IntegerField(name="test", description="A test column")
-    items = [1, 2, 3]
-    col = Column(field=field, items=items)
-    # attributes from the Field object
-    assert col.name == "test"
-    assert col.type == "integer"
-    assert col.description == "A test column"
-    # attributes from the Column object
-    assert col.items == items
-    assert col.field == field
-    with pytest.raises(AttributeError):
-        _ = col.not_an_attribute
-
-
-def test_set_attr():
-    field = IntegerField(name="test", description="A test column")
-    items = [1, 2, 3]
-    col = Column(field=field, items=items)
-    with pytest.raises(AttributeError):
-        col.name = "new_name"
-    with pytest.raises(AttributeError):
-        col.description = "new_description"
-    with pytest.raises(AttributeError):
-        col.type = "new_type"
-    with pytest.raises(AttributeError):
-        col.items = [1, 2, 3]
-
-
-def test_append():
-    field = IntegerField(name="test")
-    items = [1, 2, 3]
-    col = Column(field=field, items=items)
-    col.append(4)
+    new_items = col.items
+    new_items.append(4)
+    assert col.items == [1, 2, 3]
+    col.items = new_items
     assert col.items == [1, 2, 3, 4]
-    with pytest.raises(ValidationError):
-        col.append("a")
 
 
-def test_replace():
-    field = IntegerField(name="test")
+def test_is_valid():
+    field = IntegerField(name="test", constraints={"minimum": 1, "maximum": 3})
     items = [1, 2, 3]
     col = Column(field=field, items=items)
-    col.replace([1, 2])
-    assert col.items == [1, 2]
+    assert col.is_valid()
+    items = [0, 2, 3, 5]
     with pytest.raises(ValidationError):
-        col.replace(["a"])
+        col.is_valid(items=items)
+    assert not col.is_valid(items=items, raise_exception=False)

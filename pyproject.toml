@@ -72,4 +72,3 @@ omit = [
   "*/__init__.py",  # Exclude all __init__.py files
   # Add other patterns if needed, e.g., "*/.venv/*", "*/tests/*", etc.
 ]
-
