@@ -23,7 +23,6 @@ repos:
     rev: v1.14.1 # Use a specific version for stability
     hooks:
       - id: mypy
-        args: [--strict, --no-incremental]
+        args: [sweet_validation, --strict, --no-incremental]
         stages: [pre-push]
-        files: ^(sweet-validation)/.*\.py$
         exclude: .*/tests/.*

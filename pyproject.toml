@@ -61,6 +61,7 @@ ignore = ["UP006"]  # Ignore "Use `type` instead of `Type`" warnings
 
 [tool.my-py]
 strict = true
+files = ["sweet-validation/"]
 plugins = ["pydantic.mypy"]
 exclude = ["*/tests/"]
 
