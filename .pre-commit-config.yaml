@@ -19,3 +19,11 @@ repos:
       - id: ruff-format
         types_or: [ python ]
         stages: [pre-push]
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.14.1 # Use a specific version for stability
+    hooks:
+      - id: mypy
+        args: [--strict, --ignore-missing-imports]
+        files: ^sweet_validation/.*\.py$  # Include .py files in sweet_validation and subdirectories
+        exclude: .*/tests/.*
+        stages: [pre-push]
