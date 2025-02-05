@@ -15,4 +15,4 @@ def validate_csv_file(fn_csv: str, fn_schema: str) -> bool:
     """
     r = Resource(source=fn_csv, schema=fn_schema)
     valid = r.validate()
-    return valid.valid
+    return bool(valid.valid)

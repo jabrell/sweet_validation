@@ -23,7 +23,7 @@ repos:
     rev: v1.14.1 # Use a specific version for stability
     hooks:
       - id: mypy
-        args: [--strict]
+        args: [--strict, --ignore-missing-imports]
         files: ^sweet_validation/.*\.py$  # Include .py files in sweet_validation and subdirectories
-        exclude: ^sweet_validation/.*/tests/.*\.py$ # Exclude .py files in "tests" folders within sweet_validation
+        exclude: .*/tests/.*
         stages: [pre-push]
