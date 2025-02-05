@@ -23,5 +23,5 @@ repos:
     rev: v1.14.1 # Use a specific version for stability
     hooks:
       - id: mypy
-        args: [--strict]
+        args: [--strict, --no-incremental]
         stages: [pre-push]
