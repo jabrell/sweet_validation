@@ -44,3 +44,14 @@ def test_immutable_items():
     assert col.items == [1, 2, 3]
     col.items = new_items
     assert col.items == [1, 2, 3, 4]
+
+
+def test_is_valid():
+    field = IntegerField(name="test", constraints={"minimum": 1, "maximum": 3})
+    items = [1, 2, 3]
+    col = Column(field=field, items=items)
+    assert col.is_valid()
+    items = [0, 2, 3, 5]
+    with pytest.raises(ValidationError):
+        col.is_valid(items=items)
+    assert not col.is_valid(items=items, raise_exception=False)

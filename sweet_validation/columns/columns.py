@@ -1,14 +1,15 @@
-from copy import deepcopy
 from typing import Any
 
 from frictionless import Field, Report, Resource, Schema
 
 from sweet_validation.exceptions import ValidationError
 
+from .validated_items import ValidatedItems
+
 __all__ = ["Column"]
 
 
-class Column:
+class Column(ValidatedItems):
     """A column is defined as a list of items and a frictionless Field object.
 
     Columns roughly behave like lists but is checked against the Field object.
@@ -74,21 +75,9 @@ class Column:
     _field: Field
 
     def __init__(self, field: Field, items: list[Any] | None = None):
+        # first assign the field so the validation can be done, then call parent class
         self._field = field
-        if items:
-            self.is_valid(items=items)
-        self._items = items or []
-
-    @property
-    def items(self) -> list[Any]:
-        """Return the items of the column."""
-        return deepcopy(self._items)
-
-    @items.setter
-    def items(self, items: list[Any]) -> None:
-        """Set the items of the column."""
-        self.is_valid(items=items)
-        self._items = items
+        super().__init__(items=items)
 
     @property
     def field(self) -> Field:
@@ -100,11 +89,18 @@ class Column:
         """Set the field object of the column."""
         raise AttributeError("Cannot reset the field. Create a new column instead.")
 
-    def is_valid(self, items: list[Any] | None = None) -> None:
+    def is_valid(
+        self, items: list[Any] | None = None, raise_exception: bool = True
+    ) -> bool:
         """Raise a ValidationError if the items are not valid.
 
         Args:
             items (list): A list of items. If None, the column items are used.
+            raise_exception (bool): If True, raise a ValidationError if the items
+                are not valid. If False returns False if validation fails.
+
+        Returns:
+            bool: True if the items are valid.
 
         Raises:
             ValidationError: If the items are not valid.
@@ -112,7 +108,10 @@ class Column:
         items = items or self.items
         rep = self.validate_items(items=items)
         if not rep.valid:
-            raise ValidationError(report=rep)
+            if raise_exception:
+                raise ValidationError(report=rep)
+            return False
+        return True
 
     def validate_items(self, items: list[Any] | None = None) -> Report:
         """Validate a list of items against the Field object.
