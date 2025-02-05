@@ -25,3 +25,5 @@ repos:
       - id: mypy
         args: [--strict, --no-incremental]
         stages: [pre-push]
+        files: ^(sweet-validation)/.*\.py$
+        exclude: .*/tests/.*
