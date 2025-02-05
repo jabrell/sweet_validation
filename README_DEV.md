@@ -1,13 +1,17 @@
 # Environment setup
 
-We use [uv](https://docs.astral.sh/uv/) for dependency management. Use
+We use [uv](https://docs.astral.sh/uv/) for dependency management.
 
+To create an environment with all dev dependencies you can use (also with poetry
+or pip):
+``
+uv pip install -r requirements_dev.txt
+``
+
+To use the lock file, use
 ``
 uv sync
 ``
-
-to create an environment with all dev dependencies.
-
 
 # Pre-commit hooks
 We use pre-commit hooks. Linting and formatting takes place before pushing. To
@@ -27,4 +31,9 @@ Fixing ruff issues can also done with
 
 ``
 uvx ruff check --fixAll
+``
+
+or running type checks:
+``
+uvx mypy --config-file pyproject.toml --ignore-missing-imports sweet_validation
 ``

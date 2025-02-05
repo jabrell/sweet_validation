@@ -8,7 +8,7 @@
             "name": "Main Dev",
             "type": "debugpy",
             "request": "launch",
-            "program": "main_dev.py",
+            "program": "_jab_main_dev.py",
             "console": "integratedTerminal"
         }
     ]
