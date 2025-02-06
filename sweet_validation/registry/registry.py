@@ -3,7 +3,7 @@ from typing import Any, Generic, TypeVar
 
 from frictionless import Schema
 
-from sweet_validation.items.validated_values import ValidatedValues
+from sweet_validation.items.validated_values import ValidatedValuesProtocol
 from sweet_validation.storage import Storage
 
 # Define a type variable for allowed schemas currently bound to only allow for
@@ -101,7 +101,7 @@ class Registry(ABC, Generic[AllowedSchema]):
         raise NotImplementedError
 
     @abstractmethod
-    def get_data(self, key: Any) -> ValidatedValues:
+    def get_data(self, key: Any) -> ValidatedValuesProtocol:
         """Return a data object by key.
 
         Args:
@@ -116,7 +116,7 @@ class Registry(ABC, Generic[AllowedSchema]):
         raise NotImplementedError
 
     @abstractmethod
-    def save_data(self, key: Any, data: ValidatedValues) -> None:
+    def save_data(self, key: Any, data: ValidatedValuesProtocol) -> None:
         """Save a data object by key.
 
         Args:
@@ -139,7 +139,7 @@ class Registry(ABC, Generic[AllowedSchema]):
         """
         raise NotImplementedError
 
-    def update_data(self, key: Any, data: ValidatedValues) -> None:
+    def update_data(self, key: Any, data: ValidatedValuesProtocol) -> None:
         """Update a data object by key.
 
         Args:
@@ -152,7 +152,7 @@ class Registry(ABC, Generic[AllowedSchema]):
         raise NotImplementedError
 
     @abstractmethod
-    def get_column_data(self, data: Any, column: Any) -> ValidatedValues:
+    def get_column_data(self, data: Any, column: Any) -> ValidatedValuesProtocol:
         """Return a column object by key.
 
         Args:
