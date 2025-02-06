@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from copy import deepcopy
-from typing import Any, Generic, TypeVar, Protocol
+from typing import Any, Generic, Protocol, TypeVar
 
 T = TypeVar("T")
 
