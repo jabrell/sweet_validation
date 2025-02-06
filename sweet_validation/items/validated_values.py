@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from copy import deepcopy
-from typing import Any, Generic, Protocol, TypeVar
+from typing import Any, Generic, Protocol, TypeVar, runtime_checkable
 
 T = TypeVar("T")
 
@@ -67,6 +67,7 @@ class ValidatedValues(ABC, Generic[T]):
         raise NotImplementedError  # pragma: no cover
 
 
+@runtime_checkable
 class ValidatedValuesProtocol(Protocol):
     @property
     def values(self) -> Any: ...
