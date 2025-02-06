@@ -38,6 +38,6 @@ class Storage(ABC):
         raise NotImplementedError  # pragma: no cover
 
     @abstractmethod
-    def list(self):
+    def list(self) -> list[Any]:
         """List all keys in the storage backend."""
         raise NotImplementedError  # pragma: no cover

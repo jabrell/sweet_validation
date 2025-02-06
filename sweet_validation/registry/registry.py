@@ -3,7 +3,7 @@ from typing import Any, Generic, TypeVar
 
 from frictionless import Schema
 
-from sweet_validation.items import ValidatedValues
+from sweet_validation.items.validated_values import ValidatedValues
 from sweet_validation.storage import Storage
 
 # Define a type variable for allowed schemas currently bound to only allow for
