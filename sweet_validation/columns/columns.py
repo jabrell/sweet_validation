@@ -4,38 +4,16 @@ from frictionless import Field, Report, Resource, Schema
 
 from sweet_validation.exceptions import ValidationError
 
-from .validated_items import ValidatedItems
+from .validated_values import ValidatedValues
 
 __all__ = ["Column"]
 
 
-class Column(ValidatedItems):
+class Column(ValidatedValues[list[Any]]):
     """A column is defined as a list of items and a frictionless Field object.
 
-    Columns roughly behave like lists but is checked against the Field object.
-
-    Attributes:
-        field (Field): A frictionless Field object.
-            The field object defines the type and constraints of the column.
-            It can only be modified during instantiation. Otherwise it is
-            immutable.
-        items (list): A list of items. The items are validated against the field object.
-            items are immutable and can only be set during instantiation or by
-            replacing the items (e.g., col.items = [1, 2, 3]) which triggers
-            a validation check.
-
-    Methods:
-        is_valid: Raise a ValidationError if the items are not valid. It can also
-            be used to validate a list of items against the Field object.
-        validate_items: Validate a list of items against the Field object.
-        get_resource: Return a frictionless Resource object with the column items.
-
-    Raises:
-        ValidationError: If the items are not valid given the Field object.
-        AttributeError: If the fields are modified after instantiation.
-
     The field object defines the type and constraints of the column and is based
-    on the frictionless.Field object. The items are validated against this field
+    on the frictionless.Field object. Values are validated against this field
     every time they are appended or extended.
 
     For more information on the Field object, see:
@@ -44,40 +22,63 @@ class Column(ValidatedItems):
     - [Constraints](https://specs.frictionlessdata.io/table-schema/#constraints)
     - [Table and Field Scheme standard](https://specs.frictionlessdata.io/table-schema/#constraints)
 
+    Attributes:
+        field (Field): A frictionless Field object.
+            The field object defines the type and constraints of the column.
+            It can only be modified during instantiation. Otherwise it is
+            immutable.
+        values (list): A list of items. The items are validated against the field
+            object. values are immutable and can only be set during instantiation or by
+            replacing the values (e.g., col.values = [1, 2, 3]) which triggers
+            a validation check.
+
+    Methods:
+        is_valid: Raise a ValidationError if values are not valid. It can also
+            be used to validate a list of items against the Field object.
+        validate: Validate values against the Field object.
+        get_resource: Return a frictionless Resource object with the values and
+            meta-data.
+
+    Raises:
+        ValidationError: If the items are not valid given the Field object.
+        AttributeError: If the fields are modified after instantiation.
+
     Examples:
 
         ```python
         from frictionless.fields import IntegerField
         field = IntegerField(name="test", constraints={"minimum": 1, "maximum": 3})
-        col = Column(field=field, items=[1, 2, 3])
+        col = Column(field=field, values=[1, 2, 3])
         ```
 
-        The field property is immutable and items can only be replaced by a new list.
-        That means that you always receive a copy of items and fields and modifying
-        these copies will not affect the original column.
+        The field property is immutable and values can only be replaced by a new list
+        but are otherwise immutable. That means that you always receive a copy of
+        values and fields and modifying these copies will not affect the original
+        column object.
 
         ```python
         from frictionless.fields import IntegerField
         field = IntegerField(name="test")
-        col = Column(field=field, items=[1, 2, 3])
-        print(col.items)  # returns [1, 2, 3]
-        new_items = col.items
+        col = Column(field=field, values=[1, 2, 3])
+        print(col.value)  # returns [1, 2, 3]
+        new_items = col.values
         new_items.append(4)
-        print(col.items)  # still returns [1, 2, 3]
-        col.items = new_items
-        print(col.items)  # returns [1, 2, 3, 4]
+        print(col.values)  # still returns [1, 2, 3]
+        col.values = new_items
+        print(col.values)  # returns [1, 2, 3, 4]
         new_field = IntegerField(name="another_test") # raises AttributeError
         ```
 
     """
 
-    _items: list[Any]
+    _values: list[Any] = []
     _field: Field
 
-    def __init__(self, field: Field, items: list[Any] | None = None):
+    def __init__(self, field: Field, values: list[Any] | None = None):
+        values = values or []
         # first assign the field so the validation can be done, then call parent class
         self._field = field
-        super().__init__(items=items)
+        super().__init__(values=values)
 
     @property
     def field(self) -> Field:
@@ -90,30 +91,30 @@ class Column(ValidatedItems):
         raise AttributeError("Cannot reset the field. Create a new column instead.")
 
     def is_valid(
-        self, items: list[Any] | None = None, raise_exception: bool = True
+        self, values: list[Any] | None = None, raise_exception: bool = True
     ) -> bool:
-        """Raise a ValidationError if the items are not valid.
+        """Raise a ValidationError if values are not valid.
 
         Args:
-            items (list): A list of items. If None, the column items are used.
-            raise_exception (bool): If True, raise a ValidationError if the items
+            values (list): A list of items. If None, the column values are used.
+            raise_exception (bool): If True, raise a ValidationError if values
                 are not valid. If False returns False if validation fails.
 
         Returns:
-            bool: True if the items are valid.
+            bool: True if values are valid. False otherwise.
 
         Raises:
             ValidationError: If the items are not valid.
         """
-        items = items or self.items
-        rep = self.validate_items(items=items)
+        values = values or self.values
+        rep = self.validate(values=values)
         if not rep.valid:
             if raise_exception:
                 raise ValidationError(report=rep)
             return False
         return True
 
-    def validate_items(self, items: list[Any] | None = None) -> Report:
+    def validate(self, values: list[Any] | None = None) -> Report:
         """Validate a list of items against the Field object.
 
         Args:
@@ -122,14 +123,14 @@ class Column(ValidatedItems):
         Raises:
             ValueError: If the items are not valid.
         """
-        items = items or self.items
-        return self.get_resource(items=items).validate()
+        values = values or self.values
+        return self.get_resource(values=values).validate()
 
-    def get_resource(self, items: list[Any] | None) -> Resource:
+    def get_resource(self, values: list[Any] | None) -> Resource:
         """Return a Resource object with the column items.
 
         Args:
             items (list): A list of items. If None, the column items are used."""
-        items = items or self.items
-        data = [[self.field.name]] + [[i] for i in items]
+        values = values or self.values
+        data = [[self.field.name]] + [[i] for i in values]
         return Resource(data=data, schema=Schema(fields=[self.field]))

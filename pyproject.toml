@@ -1,7 +1,7 @@
 [project]
 name = "sweet_validation"
 version = "0.1.0"
-description = "Validate data given schemes in a sweet way"
+description = "Validate data given frictionless schemas in a sweet way"
 readme = "README.md"
 authors = [
     { name = "Jan Abrell", email = "abrell@posteo.de" }
