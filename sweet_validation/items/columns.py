@@ -117,7 +117,7 @@ class Column(ValidatedValues[list[Any]]):
         """Validate a list of items against the Field object.
 
         Args:
-            items (list): A list of items.
+            values (list): A list of items.
 
         Raises:
             ValueError: If the items are not valid.
@@ -129,7 +129,7 @@ class Column(ValidatedValues[list[Any]]):
         """Return a Resource object with the column items.
 
         Args:
-            items (list): A list of items. If None, the column items are used."""
+            values (list): A list of items. If None, the column items are used."""
         values = values or self.values
         data = [[self.field.name]] + [[i] for i in values]
         return Resource(data=data, schema=Schema(fields=[self.field]))
