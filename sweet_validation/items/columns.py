@@ -20,7 +20,7 @@ class Column(ValidatedValues[list[Any]]):
     - [Field types](https://framework.frictionlessdata.io/docs/fields/any.html)
         under "Data Fields"
     - [Constraints](https://specs.frictionlessdata.io/table-schema/#constraints)
-    - [Table and Field Scheme standard](https://specs.frictionlessdata.io/table-schema/#constraints)
+    - [Table and Field Scheme standard](https://datapackage.org/standard/table-schema/)
 
     Attributes:
         field (Field): A frictionless Field object.
@@ -68,7 +68,6 @@ class Column(ValidatedValues[list[Any]]):
         print(col.values)  # returns [1, 2, 3, 4]
         new_field = IntegerField(name="another_test") # raises AttributeError
         ```
-
     """
 
     _values: list[Any] = []

@@ -1,8 +1,8 @@
 import pytest
 from frictionless.fields import IntegerField
 
-from sweet_validation.columns.columns import Column
 from sweet_validation.exceptions import ValidationError
+from sweet_validation.items import Column
 
 
 def test_init():

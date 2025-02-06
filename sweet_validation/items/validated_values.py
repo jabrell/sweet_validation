@@ -1,8 +1,10 @@
 from abc import ABC, abstractmethod
 from copy import deepcopy
-from typing import Any, Generic, TypeVar
+from typing import Any, Generic, Protocol, TypeVar, runtime_checkable
 
 T = TypeVar("T")
+
+__all__ = ["ValidatedValues", "ValidatedValuesProtocol"]
 
 
 class ValidatedValues(ABC, Generic[T]):
@@ -63,3 +65,11 @@ class ValidatedValues(ABC, Generic[T]):
             Any: Should return a validation report.
         """
         raise NotImplementedError  # pragma: no cover
+
+
+@runtime_checkable
+class ValidatedValuesProtocol(Protocol):
+    @property
+    def values(self) -> Any: ...
+    def is_valid(self, value: Any) -> bool: ...
+    def validate(self, value: Any) -> Any: ...
