@@ -4,6 +4,8 @@ from typing import Any, Generic, TypeVar
 
 T = TypeVar("T")
 
+__all__ = ["ValidatedValues"]
+
 
 class ValidatedValues(ABC, Generic[T]):
     """Abstract class for class holding a value object that are always validated

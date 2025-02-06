@@ -69,6 +69,12 @@ exclude = ["*/tests/"]
 
 [tool.coverage.run]
 omit = [
-  "*/__init__.py",  # Exclude all __init__.py files
-  # Add other patterns if needed, e.g., "*/.venv/*", "*/tests/*", etc.
+    "*/__init__.py",  # Exclude all __init__.py files
+    # Add other patterns if needed, e.g., "*/.venv/*", "*/tests/*", etc.
+]
+exclude_lines = [
+    'pragma: no cover',
+    'except NotImplementedError:',
+    'raise NotImplementedError',
+    'return NotImplemented'
 ]
