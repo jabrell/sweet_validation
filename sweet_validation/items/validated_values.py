@@ -26,7 +26,7 @@ class ValidatedValues(ABC, Generic[T]):
 
     def __init__(self, values: T):
         if self.is_valid(values=values, raise_exception=True):
-            self._values = values
+            self._values = deepcopy(values)
 
     @property
     def values(self) -> T:
