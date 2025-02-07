@@ -3,7 +3,7 @@ from typing import Any, Generic, TypeVar
 
 from frictionless import Schema
 
-from sweet_validation.items.validated_values import ValidatedValuesProtocol
+from sweet_validation.items.valid_item import ValidItemProtocol
 from sweet_validation.storage import Storage
 
 # Define a type variable for allowed schemas currently bound to only allow for
@@ -16,7 +16,13 @@ class Registry(ABC, Generic[AllowedSchema]):
 
     A registry provides access to data and schemas that describe the data and
     can be used to validate the data. For this the registry uses two separate
-    storage backends, one for the data and one for the schemas. The registry
+    storage backends:
+        - Schema storage: The schema storage is used to store schemas. In addition,
+            it is used to maintain the relation between data and schemas.
+        - Data storage: The data storage is used to store data objects. The data
+            objects are assumed to be a ValidItem objects
+            (:py:class:`sweet_validation.items.ValidItem`)
+
     maintains the link between data and respective schemas and allows to get
     data with the schema but also single columns together with their description.
 
@@ -101,7 +107,7 @@ class Registry(ABC, Generic[AllowedSchema]):
         raise NotImplementedError
 
     @abstractmethod
-    def get_data(self, key: Any) -> ValidatedValuesProtocol:
+    def get_data(self, key: Any) -> ValidItemProtocol:
         """Return a data object by key.
 
         Args:
@@ -116,7 +122,7 @@ class Registry(ABC, Generic[AllowedSchema]):
         raise NotImplementedError
 
     @abstractmethod
-    def save_data(self, key: Any, data: ValidatedValuesProtocol) -> None:
+    def save_data(self, key: Any, data: ValidItemProtocol) -> None:
         """Save a data object by key.
 
         Args:
@@ -139,7 +145,7 @@ class Registry(ABC, Generic[AllowedSchema]):
         """
         raise NotImplementedError
 
-    def update_data(self, key: Any, data: ValidatedValuesProtocol) -> None:
+    def update_data(self, key: Any, data: ValidItemProtocol) -> None:
         """Update a data object by key.
 
         Args:
@@ -152,7 +158,7 @@ class Registry(ABC, Generic[AllowedSchema]):
         raise NotImplementedError
 
     @abstractmethod
-    def get_column_data(self, data: Any, column: Any) -> ValidatedValuesProtocol:
+    def get_column_data(self, data: Any, column: Any) -> ValidItemProtocol:
         """Return a column object by key.
 
         Args:

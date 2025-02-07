@@ -32,11 +32,6 @@ class Storage(ABC):
         """Delete a value from the storage backend."""
         raise NotImplementedError  # pragma: no cover
 
-    def update(self, key: Any, value: Any) -> None:
-        """Update a value in the storage backend."""
-        self.delete(key)
-        self.save(key, value)
-
     @abstractmethod
     def exists(self, key: Any) -> bool:
         """Check if a value exists in the storage backend."""
@@ -46,3 +41,8 @@ class Storage(ABC):
     def list(self) -> list[Any]:
         """List all keys in the storage backend."""
         raise NotImplementedError  # pragma: no cover
+
+    def update(self, key: Any, value: Any) -> None:
+        """Update a value in the storage backend."""
+        self.delete(key)
+        self.save(key, value)

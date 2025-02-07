@@ -4,12 +4,12 @@ from frictionless import Field, Report, Resource, Schema
 
 from sweet_validation.exceptions import ValidationError
 
-from .validated_values import ValidatedValues
+from .valid_item import ValidItem
 
 __all__ = ["Column"]
 
 
-class Column(ValidatedValues[list[Any]]):
+class Column(ValidItem[list[Any]]):
     """A column is defined as a list of items and a frictionless Field object.
 
     The field object defines the type and constraints of the column and is based

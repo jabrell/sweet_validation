@@ -4,12 +4,15 @@ from typing import Any, Generic, Protocol, TypeVar, runtime_checkable
 
 T = TypeVar("T")
 
-__all__ = ["ValidatedValues", "ValidatedValuesProtocol"]
+__all__ = ["ValidItem", "ValidItemProtocol"]
 
 
-class ValidatedValues(ABC, Generic[T]):
-    """Abstract class for class holding a value object that are always validated
+class ValidItem(ABC, Generic[T]):
+    """Abstract class for class holding an value object that are always validated
     if changed.
+
+    The class implements the logic of item validation and ensures that items cannot
+    be changed without validation.
 
     Attributes:
         values: An objects that contains values that are validated.
@@ -68,7 +71,7 @@ class ValidatedValues(ABC, Generic[T]):
 
 
 @runtime_checkable
-class ValidatedValuesProtocol(Protocol):
+class ValidItemProtocol(Protocol):
     @property
     def values(self) -> Any: ...
     def is_valid(self, value: Any) -> bool: ...

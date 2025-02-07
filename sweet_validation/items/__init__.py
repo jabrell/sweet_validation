@@ -1,4 +1,4 @@
 from .columns import Column
-from .validated_values import ValidatedValues
+from .valid_item import ValidItem
 
-__all__ = ["Column", "ValidatedValues"]
+__all__ = ["Column", "ValidItem"]
