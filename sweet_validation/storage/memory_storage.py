@@ -1,7 +1,7 @@
 from copy import deepcopy
 from typing import Any
 
-from .storage import Storage, SchemaStorage
+from .storage import SchemaStorage, Storage
 
 __all__ = ["MemoryStorage", "MemorySchemaStorage"]
 
