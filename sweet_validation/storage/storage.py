@@ -1,5 +1,4 @@
 from abc import ABC, abstractmethod
-from copy import deepcopy
 from typing import Any
 
 __all__ = ["Storage"]
@@ -85,13 +84,11 @@ class SchemaStorage(Storage):
         add_schema_for_data: Add a data schema relation.
     """
 
-    _relations: Any
-
     @property
     @abstractmethod
     def relations(self) -> Any:
         """Return the relations between schemas and data."""
-        return deepcopy(self._relations)
+        raise NotImplementedError
 
     @abstractmethod
     def get_key_for_data(self, data_key: Any) -> Any:

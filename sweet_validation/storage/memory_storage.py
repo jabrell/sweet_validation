@@ -136,9 +136,9 @@ class MemorySchemaStorage(SchemaStorage, MemoryStorage):
         self._relations = deepcopy(relations) if relations else {}
 
     @property
-    def relations(self) -> dict:
+    def relations(self) -> dict[str, list[Any]]:
         """Return the relations between schemas and data."""
-        return super().relations
+        return deepcopy(self._relations)
 
     def save(self, key: str, value: Any) -> None:
         """Save a schema to the storage
@@ -168,7 +168,11 @@ class MemorySchemaStorage(SchemaStorage, MemoryStorage):
         del self._relations[key]
 
     def replace(
-        self, key: str, value: Any, raise_exception: bool = True, **kwargs
+        self,
+        key: str,
+        value: Any,
+        raise_exception: bool = True,
+        **kwargs: dict[str, Any],
     ) -> list[str]:
         """Replace a schema in the storage
 
