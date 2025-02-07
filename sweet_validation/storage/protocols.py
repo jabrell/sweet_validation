@@ -6,6 +6,8 @@ __all__ = ["StorageProtocol", "SchemaRelationsProtocol", "SchemaStorageProtocol"
 # TODO - it would be better to have a more specific types for keys and values.
 #        This would however require four type variables to specify the types of
 #        the SchemaStorageProtocol.
+# TODO should get rid SchemaStorage: All relations should be managed at the registry
+#       level
 @runtime_checkable
 class StorageProtocol(Protocol):
     """Protocol for storage backends
@@ -43,6 +45,7 @@ class SchemaRelationsProtocol(Protocol):
         get_schema_for_data: Return the schema object for a data key.
         list_data_for_schema: List all data keys for a schema key.
         add_schema_for_data: Add a data schema relation.
+        delete_relation: Delete a data schema relation.
     """
 
     relations: dict[Any, Any]
