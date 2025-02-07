@@ -4,7 +4,7 @@ from typing import Any, Generic, TypeVar
 from frictionless import Schema
 
 from sweet_validation.items.valid_item import ValidItemProtocol
-from sweet_validation.storage import StorageProtocol, SchemaStorageProtocol
+from sweet_validation.storage import SchemaStorageProtocol, StorageProtocol
 
 # Define a type variable for allowed schemas currently bound to only allow for
 # frictionless schemas
