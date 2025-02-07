@@ -33,16 +33,16 @@ def test_save_raises():
         storage.save("key", "value")
 
 
-def test_update():
+def test_replace():
     storage = MemoryStorage(data={"key": "value"})
-    storage.update("key", "new_value")
+    storage.replace("key", "new_value")
     assert storage._data == {"key": "new_value"}
 
 
-def test_update_raises():
+def test_replace_raises():
     storage = MemoryStorage()
     with pytest.raises(KeyError):
-        storage.update("key", "value")
+        storage.replace("key", "value")
 
 
 def test_delete():
