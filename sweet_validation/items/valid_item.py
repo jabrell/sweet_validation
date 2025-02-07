@@ -15,9 +15,9 @@ class ValidItem(ABC, Generic[T]):
     be changed without validation.
 
     Attributes:
-        values: An objects that contains values that are validated.
-            Values are immutable and can only be replaced by reassigning the values
-            attribute which triggers the validation process.
+        item: An objects that contains values that are validated.
+            The item is immutable and can only be replaced by reassigning
+            the item which triggers the validation process.
 
     Methods:
         validate: Validate items
@@ -25,25 +25,25 @@ class ValidItem(ABC, Generic[T]):
             an item object against the validation used in the class.
     """
 
-    _values: T
+    _item: T
 
-    def __init__(self, values: T):
-        if self.is_valid(values=values, raise_exception=True):
-            self._values = deepcopy(values)
+    def __init__(self, item: T):
+        if self.is_valid(item=item, raise_exception=True):
+            self._item = deepcopy(item)
 
     @property
-    def values(self) -> T:
+    def item(self) -> T:
         """Return the items of the column."""
-        return deepcopy(self._values)
+        return deepcopy(self._item)
 
-    @values.setter
-    def values(self, values: T) -> None:
+    @item.setter
+    def item(self, item: T) -> None:
         """Set the items of the column."""
-        self.is_valid(values=values, raise_exception=True)
-        self._values = values
+        self.is_valid(item=item, raise_exception=True)
+        self._item = item
 
     @abstractmethod
-    def is_valid(self, values: T, raise_exception: bool = True) -> bool:
+    def is_valid(self, item: T, raise_exception: bool = True) -> bool:
         """Check if values are not valid
 
         Args:
@@ -58,7 +58,7 @@ class ValidItem(ABC, Generic[T]):
         raise NotImplementedError  # pragma: no cover
 
     @abstractmethod
-    def validate(self, values: T) -> Any:
+    def validate(self, item: T) -> Any:
         """Validate values.
 
         Args:

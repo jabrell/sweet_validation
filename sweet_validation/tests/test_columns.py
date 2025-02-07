@@ -10,7 +10,7 @@ def test_init():
     items = [1, 2, 3]
     col = Column(field=field, values=items)
     assert col.field == field
-    assert col.values == [1, 2, 3]
+    assert col.item == [1, 2, 3]
 
 
 def test_init_wrong_types():
@@ -39,11 +39,11 @@ def test_immutable_items():
     field = IntegerField(name="test")
     items = [1, 2, 3]
     col = Column(field=field, values=items)
-    new_items = col.values
+    new_items = col.item
     new_items.append(4)
-    assert col.values == [1, 2, 3]
-    col.values = new_items
-    assert col.values == [1, 2, 3, 4]
+    assert col.item == [1, 2, 3]
+    col.item = new_items
+    assert col.item == [1, 2, 3, 4]
 
 
 def test_is_valid():
@@ -53,5 +53,5 @@ def test_is_valid():
     assert col.is_valid()
     items = [0, 2, 3, 5]
     with pytest.raises(ValidationError):
-        col.is_valid(values=items)
-    assert not col.is_valid(values=items, raise_exception=False)
+        col.is_valid(item=items)
+    assert not col.is_valid(item=items, raise_exception=False)

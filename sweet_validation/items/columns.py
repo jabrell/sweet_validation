@@ -70,14 +70,14 @@ class Column(ValidItem[list[Any]]):
         ```
     """
 
-    _values: list[Any] = []
+    _item: list[Any] = []
     _field: Field
 
     def __init__(self, field: Field, values: list[Any] | None = None):
         values = values or []
         # first assign the field so the validation can be done, then call parent class
         self._field = field
-        super().__init__(values=values)
+        super().__init__(item=values)
 
     @property
     def field(self) -> Field:
@@ -90,7 +90,7 @@ class Column(ValidItem[list[Any]]):
         raise AttributeError("Cannot reset the field. Create a new column instead.")
 
     def is_valid(
-        self, values: list[Any] | None = None, raise_exception: bool = True
+        self, item: list[Any] | None = None, raise_exception: bool = True
     ) -> bool:
         """Raise a ValidationError if values are not valid.
 
@@ -105,15 +105,15 @@ class Column(ValidItem[list[Any]]):
         Raises:
             ValidationError: If the items are not valid.
         """
-        values = values or self.values
-        rep = self.validate(values=values)
+        item = item or self.item
+        rep = self.validate(item=item)
         if not rep.valid:
             if raise_exception:
                 raise ValidationError(report=rep)
             return False
         return True
 
-    def validate(self, values: list[Any] | None = None) -> Report:
+    def validate(self, item: list[Any] | None = None) -> Report:
         """Validate a list of items against the Field object.
 
         Args:
@@ -122,14 +122,14 @@ class Column(ValidItem[list[Any]]):
         Raises:
             ValueError: If the items are not valid.
         """
-        values = values or self.values
-        return self.get_resource(values=values).validate()
+        item = item or self.item
+        return self.get_resource(item=item).validate()
 
-    def get_resource(self, values: list[Any] | None) -> Resource:
+    def get_resource(self, item: list[Any] | None) -> Resource:
         """Return a Resource object with the column items.
 
         Args:
             values (list): A list of items. If None, the column items are used."""
-        values = values or self.values
-        data = [[self.field.name]] + [[i] for i in values]
+        item = item or self.item
+        data = [[self.field.name]] + [[i] for i in item]
         return Resource(data=data, schema=Schema(fields=[self.field]))
