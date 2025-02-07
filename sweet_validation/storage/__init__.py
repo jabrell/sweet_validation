@@ -1,4 +1,9 @@
 from .memory_storage import MemorySchemaStorage, MemoryStorage
-from .storage import Storage
+from .protocols import SchemaStorageProtocol, StorageProtocol
 
-__all__ = ["MemorySchemaStorage", "MemoryStorage", "Storage"]
+__all__ = [
+    "MemorySchemaStorage",
+    "MemoryStorage",
+    "SchemaStorageProtocol",
+    "StorageProtocol",
+]

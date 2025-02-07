@@ -4,7 +4,7 @@ from typing import Any, Generic, TypeVar
 from frictionless import Schema
 
 from sweet_validation.items.valid_item import ValidItemProtocol
-from sweet_validation.storage import Storage
+from sweet_validation.storage import SchemaStorageProtocol, StorageProtocol
 
 # Define a type variable for allowed schemas currently bound to only allow for
 # frictionless schemas
@@ -43,13 +43,13 @@ class Registry(ABC, Generic[AllowedSchema]):
 
     @property
     @abstractmethod
-    def schema_storage(self) -> Storage:
+    def schema_storage(self) -> SchemaStorageProtocol:
         """Return the schema storage backend."""
         raise NotImplementedError
 
     @property
     @abstractmethod
-    def data_storage(self) -> Storage:
+    def data_storage(self) -> StorageProtocol:
         """Return the data storage backend."""
         raise NotImplementedError
 

@@ -1,12 +1,10 @@
 from copy import deepcopy
 from typing import Any
 
-from .storage import SchemaStorage, Storage
-
 __all__ = ["MemoryStorage", "MemorySchemaStorage"]
 
 
-class MemoryStorage(Storage):
+class MemoryStorage:
     """A storage backend that stores data in memory.
 
     This storage uses a dictionary to store data in memory given a key under which
@@ -84,8 +82,21 @@ class MemoryStorage(Storage):
         """
         return list(self._data.keys())
 
+    def replace(self, key: str, value: Any) -> None:
+        """Replace a value in the storage
 
-class MemorySchemaStorage(SchemaStorage, MemoryStorage):
+        Args:
+            key (str): The key of the value
+            value (Any): The new value
+
+        Raises:
+            KeyError: If the key does not exist
+        """
+        self.delete(key)
+        self.save(key, value)
+
+
+class MemorySchemaStorage(MemoryStorage):
     """A schema storage backend that stores schemas in memory.
 
     This storage uses a dictionary to store schemas in memory given a key under
@@ -167,12 +178,12 @@ class MemorySchemaStorage(SchemaStorage, MemoryStorage):
         super().delete(key)
         del self._relations[key]
 
-    def replace(
+    # ignore mypy error since we overload the parent method signature
+    def replace(  # type: ignore[override]
         self,
         key: str,
         value: Any,
         raise_exception: bool = True,
-        **kwargs: dict[str, Any],
     ) -> list[str]:
         """Replace a schema in the storage
 
