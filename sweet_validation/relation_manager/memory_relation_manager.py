@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from collections.abc import Generator
+from collections.abc import Callable, Generator
 from contextlib import contextmanager
 from typing import Any
 
@@ -13,7 +13,7 @@ __all__ = ["MemoryRelationManager"]
 
 
 @event.listens_for(Engine, "connect")
-def set_sqlite_pragma(dbapi_connection: Any) -> None:
+def set_sqlite_pragma(dbapi_connection: Any) -> Callable:
     """Enable foreign key support for SQLite connections
 
     Only needed for sqlite connections
@@ -132,7 +132,7 @@ class MemoryRelationManager:
         """
         with self.get_session() as session:
             data = session.query(Data).filter(Data.id == id).first()
-            return data.id_schema
+            return str(data.id_schema)
 
     def close(self) -> None:
         self.close_engine()
