@@ -1,10 +1,10 @@
 from copy import deepcopy
 from typing import Any
 
-__all__ = ["MemoryStorage", "MemorySchemaStorage"]
+__all__ = ["InMemoryStorage", "MemorySchemaStorage"]
 
 
-class MemoryStorage:
+class InMemoryStorage:
     """A storage backend that stores data in memory.
 
     This storage uses a dictionary to store data in memory given a key under which
@@ -96,7 +96,7 @@ class MemoryStorage:
         self.save(key, value)
 
 
-class MemorySchemaStorage(MemoryStorage):
+class MemorySchemaStorage(InMemoryStorage):
     """A schema storage backend that stores schemas in memory.
 
     This storage uses a dictionary to store schemas in memory given a key under
