@@ -13,7 +13,7 @@ __all__ = ["MemoryRelationManager"]
 
 
 @event.listens_for(Engine, "connect")
-def set_sqlite_pragma(dbapi_connection: Any, connection_record):
+def set_sqlite_pragma(dbapi_connection: Any) -> None:
     """Enable foreign key support for SQLite connections
 
     Only needed for sqlite connections
