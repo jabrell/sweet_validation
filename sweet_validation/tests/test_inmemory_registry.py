@@ -45,3 +45,38 @@ def test_delete_schema():
     registry.delete_data("dkey")
     registry.delete_schema("skey")
     assert registry.list_schemas() == []
+
+
+def test_delete_data():
+    registry = InMemoryRegistry()
+    # raise KeyError if data does not exist
+    with pytest.raises(KeyError):
+        registry.delete_data("key")
+
+    registry.add_schema("skey", "schema")
+    registry.add_data("dkey", "skey", data="data")
+    registry.delete_data("dkey")
+    assert registry.list_data() == []
+
+
+def test_replace_schema():
+    registry = InMemoryRegistry()
+    # raise IntegrityError if schema does not exist
+    with pytest.raises(KeyError):
+        registry.replace_schema("key", "schema")
+    registry.add_schema("skey", "schema")
+    registry.add_data("dkey", "skey", data="data")
+    registry.replace_schema("skey", "new_schema")
+    assert registry.get_schema("skey") == "new_schema"
+
+
+def test_replace_data():
+    registry = InMemoryRegistry()
+    # raise KeyError if data does not exist
+    with pytest.raises(KeyError):
+        registry.replace_data("key", "data")
+
+    registry.add_schema("skey", "schema")
+    registry.add_data("dkey", "skey", data="data")
+    registry.replace_data("dkey", "new_data")
+    assert registry.get_data("dkey") == "new_data"

@@ -165,12 +165,30 @@ class SchemaManager:
         Args:
             id (str): Data key
 
+        raises:
+            KeyError: If the data key does not exist
+
         Returns:
             str: Schema key
         """
         with self.get_session() as session:
             data = session.query(Data).filter(Data.id == id).first()
+            if not data:
+                raise KeyError(f"Data key '{id}' not found")
             return str(data.id_schema)
+
+    def list_data_for_schema(self, id_schema: str) -> list[str]:
+        """Get the data keys associated with the schema key
+
+        Args:
+            id_schema (str): Schema key
+
+        Returns:
+            list[str]: List of data keys
+        """
+        with self.get_session() as session:
+            data = session.query(Data).filter(Data.id_schema == id_schema).all()
+            return [str(d.id) for d in data]
 
     def close(self) -> None:
         self.close_engine()

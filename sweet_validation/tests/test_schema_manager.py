@@ -78,7 +78,7 @@ def test_get_data_schema(fn: str):
     relation_manager.clear_and_close()
 
 
-def init_from_existing_db():
+def test_init_from_existing_db():
     relation_manager = SchemaManager(fn=db_file)
     relation_manager.insert_schema(id="s_test")
     relation_manager.insert_data(id="test", id_schema="s_test")

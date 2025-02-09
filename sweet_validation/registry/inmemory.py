@@ -57,6 +57,26 @@ class InMemoryRegistry:
         self.manager.delete_schema(id=key)
         self._schema_store.delete(key)
 
+    def replace_schema(self, key: str, schema: Any) -> None:
+        """Replace a schema in the registry
+
+        Args:
+            key (str): Key of schema
+            schema (Any): New schema
+
+        Raises:
+            KeyError: If the schema does not exist
+            ValidationError: If the schema does not conform to the metadata standard
+        """
+        # TODO check schema against metadata standard
+        # TODO check data against schema
+        for data_key in self.manager.list_data_for_schema(key):
+            data = self.get_data(data_key)
+            logging.info(f"Data: {data} Schema: {schema}")
+        # TODO how to log schema changes. The old schema is not available after
+        # replacement
+        self._schema_store.replace(key, schema)
+
     def list_schemas(self) -> list[str]:
         """List all schemas
 
@@ -108,6 +128,24 @@ class InMemoryRegistry:
         """
         self.manager.delete_data(id=key)
         self._data_store.delete(key)
+
+    def replace_data(self, key: str, data: Any) -> None:
+        """Replace a data in the registry
+
+        Args:
+            key (str): Key of data
+            data (Any): New data
+
+        Raises:
+            KeyError: If the data does not exist
+            ValidationError: If the data does not conform to the schema
+        """
+        # TODO check data against schema
+        # TODO how to log data changes. The old data is not available after
+        schema = self.manager.get_data_schema(key)
+        logging.info(f"Validating Data: {data} Schema: {schema}")
+        # replacement
+        self._data_store.replace(key, data)
 
     def list_data(self) -> list[tuple[str, str]]:
         """List all data
