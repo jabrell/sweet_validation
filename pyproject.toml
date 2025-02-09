@@ -12,6 +12,7 @@ dependencies = [
     "frictionless>=5.18.0",
     "numpy>=2.2.2",
     "pandas>=2.2.3",
+    "sqlalchemy>=2.0.38",
 ]
 
 [dependency-groups]
