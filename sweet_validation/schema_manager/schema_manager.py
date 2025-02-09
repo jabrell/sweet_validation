@@ -9,7 +9,7 @@ from sqlalchemy.orm import Session, sessionmaker
 
 from .models import Base, Data, Schema  # Import your models
 
-__all__ = ["RelationManager"]
+__all__ = ["SchemaManager"]
 
 
 @event.listens_for(Engine, "connect")  # type: ignore
@@ -27,7 +27,10 @@ def set_sqlite_pragma(dbapi_connection: Any, connection_record: Any) -> None:
         cursor.close()
 
 
-class RelationManager:
+__all__ = ["SchemaManager"]
+
+
+class SchemaManager:
     """A simple relation manager based on SQLite
 
     The underlying database is in-memory if no filename is provided.
