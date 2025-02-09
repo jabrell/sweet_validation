@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from collections.abc import Callable, Generator
+from collections.abc import Generator
 from contextlib import contextmanager
 from typing import Any
 
@@ -12,8 +12,8 @@ from .models import Base, Data, Schema  # Import your models
 __all__ = ["MemoryRelationManager"]
 
 
-@event.listens_for(Engine, "connect")
-def set_sqlite_pragma(dbapi_connection: Any) -> Callable:
+@event.listens_for(Engine, "connect")  # type: ignore
+def set_sqlite_pragma(dbapi_connection: Any) -> None:
     """Enable foreign key support for SQLite connections
 
     Only needed for sqlite connections
