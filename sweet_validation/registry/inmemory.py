@@ -10,12 +10,12 @@ class InMemoryRegistry:
     _schema_store: InMemoryStorage
     _data_store: InMemoryStorage
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.manager = SchemaManager()
         self._schema_store = InMemoryStorage()
         self._data_store = InMemoryStorage()
 
-    def add_schema(self, key: str, schema: Any):
+    def add_schema(self, key: str, schema: Any) -> None:
         """Add schema to the registry. The schema is validated against the metadata
         standard. If the schema already exists, an IntegrityError is raised.
 
@@ -65,7 +65,7 @@ class InMemoryRegistry:
         """
         return self.manager.list_schemas()
 
-    def add_data(self, key: str, schema_key: str, data: Any):
+    def add_data(self, key: str, schema_key: str, data: Any) -> None:
         """Add data to the registry. The data is validated given the schema.
 
         Args:
