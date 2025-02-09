@@ -9,11 +9,11 @@ from sqlalchemy.orm import Session, sessionmaker
 
 from .models import Base, Data, Schema  # Import your models
 
-__all__ = ["MemoryRelationManager"]
+__all__ = ["RelationManager"]
 
 
 @event.listens_for(Engine, "connect")  # type: ignore
-def set_sqlite_pragma(dbapi_connection: Any) -> None:
+def set_sqlite_pragma(dbapi_connection: Any, connection_record: Any) -> None:
     """Enable foreign key support for SQLite connections
 
     Only needed for sqlite connections
@@ -27,10 +27,45 @@ def set_sqlite_pragma(dbapi_connection: Any) -> None:
         cursor.close()
 
 
-class MemoryRelationManager:
-    _conn_str: str = "sqlite:///:memory:"  # Or your connection string
+class RelationManager:
+    """A simple relation manager based on SQLite
 
-    def __init__(self) -> None:
+    The underlying database is in-memory if no filename is provided.
+    If a filename is provided, the database is stored in the file.
+    The database has two tables: Schema and Data. Schema
+
+    Attributes:
+        engine (Engine): SQLAlchemy engine
+        SessionLocal (sessionmaker): Session factory
+
+    Methods:
+        get_session: Provides a context-managed database session
+        close_engine: Close the database engine
+        insert_schema: Insert a schema into the database
+        insert_data: Insert data into the database
+        list_schemas: Fetch all schema keys
+        list_data: Fetch all data
+        delete_schema: Delete a schema given the key
+        delete_data: Delete data given the key
+        get_data_schema: Get the schema key associated with the data key
+        close: Close the database engine
+        clear_all: Clear all data in the database
+        clear_and_close: Clear all data and close the database engine
+    """
+
+    _conn_str: str
+
+    def __init__(self, fn: str | None = None) -> None:
+        """Initialize the database engine and session factory
+        Args:
+            fn (str | None): Filename of the sqlite database
+                Defaults to None, which uses an in-memory database
+        """
+        if fn:
+            self._conn_str = f"sqlite:///{fn}"
+        else:
+            self._conn_str = "sqlite:///:memory:"
+
         self.engine = create_engine(self._conn_str)
         Base.metadata.create_all(self.engine)  # Create tables if they don't exist
         self.SessionLocal = sessionmaker(bind=self.engine)  # Create session factory

@@ -1,3 +1,3 @@
-from .memory_relation_manager import MemoryRelationManager
+from .memory_relation_manager import RelationManager
 
-__all__ = ["MemoryRelationManager"]
+__all__ = ["RelationManager"]
