@@ -1418,6 +1418,7 @@ dependencies = [
     { name = "frictionless" },
     { name = "numpy" },
     { name = "pandas" },
+    { name = "pyyaml" },
     { name = "sqlalchemy" },
 ]
 
@@ -1440,6 +1441,7 @@ requires-dist = [
     { name = "frictionless", specifier = ">=5.18.0" },
     { name = "numpy", specifier = ">=2.2.2" },
     { name = "pandas", specifier = ">=2.2.3" },
+    { name = "pyyaml", specifier = ">=6.0.2" },
     { name = "sqlalchemy", specifier = ">=2.0.38" },
 ]
 

@@ -2,14 +2,22 @@ from __future__ import annotations
 
 from collections.abc import Generator
 from contextlib import contextmanager
+from pathlib import Path
 from typing import Any
 
+import yaml
+from frictionless import Schema
 from sqlalchemy import Engine, create_engine, event
 from sqlalchemy.orm import Session, sessionmaker
 
-from .models import Base, Data, Schema  # Import your models
+from .models import Base
+from .models import Data as DataTable
+from .models import Schema as SchemaTable
 
 __all__ = ["SchemaManager"]
+
+
+DEFAULT_SCHEMA = Path(__file__).parent / "default_schema.yml"
 
 
 @event.listens_for(Engine, "connect")  # type: ignore
@@ -57,18 +65,31 @@ class SchemaManager:
     """
 
     _conn_str: str
+    _meta_schema: Schema
 
-    def __init__(self, fn: str | None = None) -> None:
+    def __init__(
+        self, fn: str | None = None, meta_schema: str | Schema | None = None
+    ) -> None:
         """Initialize the database engine and session factory
         Args:
             fn (str | None): Filename of the sqlite database
                 Defaults to None, which uses an in-memory database
+            meta_schema (str | Schema | None): Metadata schema for the database
+                Defaults to None, which uses the default schema. If a string is
+                provided it is assumed to be a path to a schema file in yaml format.
         """
+        # create the meta-data schema
+        meta_schema = meta_schema or DEFAULT_SCHEMA
+        if isinstance(meta_schema, str | Path):
+            with open(meta_schema) as f:
+                meta_schema = yaml.safe_load(f)
+            meta_schema = Schema(meta_schema)
+        self._meta_schema = meta_schema
+        # create the engine and the tables
         if fn:
             self._conn_str = f"sqlite:///{fn}"
         else:
             self._conn_str = "sqlite:///:memory:"
-
         self.engine = create_engine(self._conn_str)
         Base.metadata.create_all(self.engine)  # Create tables if they don't exist
         self.SessionLocal = sessionmaker(bind=self.engine)  # Create session factory
@@ -100,7 +121,7 @@ class SchemaManager:
             IntegrityError: If the primary key is violated
         """
         with self.get_session() as session:
-            session.add(Schema(id=id))
+            session.add(SchemaTable(id=id))
             session.commit()
 
     def insert_data(self, id: str, id_schema: str) -> None:
@@ -114,7 +135,7 @@ class SchemaManager:
             IntegrityError: If the primary key or foreign constraint is violated
         """
         with self.get_session() as session:
-            session.add(Data(id=id, id_schema=id_schema))
+            session.add(DataTable(id=id, id_schema=id_schema))
             session.commit()
 
     def list_schemas(self) -> list[str]:
@@ -124,7 +145,7 @@ class SchemaManager:
             list[str]: List of schema keys
         """
         with self.get_session() as session:
-            return [schema.id for schema in session.query(Schema).all()]
+            return [schema.id for schema in session.query(SchemaTable).all()]
 
     def list_data(self) -> list[tuple[str, str]]:
         """Fetch all data
@@ -133,7 +154,9 @@ class SchemaManager:
             list[tuple[str, str]]: List of data tuples (id, id_schema)
         """
         with self.get_session() as session:
-            return [(data.id, data.id_schema) for data in session.query(Data).all()]
+            return [
+                (data.id, data.id_schema) for data in session.query(DataTable).all()
+            ]
 
     def delete_schema(self, id: str) -> None:
         """Delete a schema given the key
@@ -146,7 +169,7 @@ class SchemaManager:
                 i.e. data associated with the schema still exist
         """
         with self.get_session() as session:
-            session.query(Schema).filter(Schema.id == id).delete()
+            session.query(SchemaTable).filter(SchemaTable.id == id).delete()
             session.commit()
 
     def delete_data(self, id: str) -> None:
@@ -156,7 +179,7 @@ class SchemaManager:
             id (str): Data key
         """
         with self.get_session() as session:
-            session.query(Data).filter(Data.id == id).delete()
+            session.query(DataTable).filter(DataTable.id == id).delete()
             session.commit()
 
     def get_data_schema(self, id: str) -> str:
@@ -172,7 +195,7 @@ class SchemaManager:
             str: Schema key
         """
         with self.get_session() as session:
-            data = session.query(Data).filter(Data.id == id).first()
+            data = session.query(DataTable).filter(DataTable.id == id).first()
             if not data:
                 raise KeyError(f"Data key '{id}' not found")
             return str(data.id_schema)
@@ -187,7 +210,9 @@ class SchemaManager:
             list[str]: List of data keys
         """
         with self.get_session() as session:
-            data = session.query(Data).filter(Data.id_schema == id_schema).all()
+            data = (
+                session.query(DataTable).filter(DataTable.id_schema == id_schema).all()
+            )
             return [str(d.id) for d in data]
 
     def close(self) -> None:
@@ -196,8 +221,8 @@ class SchemaManager:
     def clear_all(self) -> None:
         """Clear all data in the database"""
         with self.get_session() as session:
-            session.query(Data).delete()
-            session.query(Schema).delete()
+            session.query(DataTable).delete()
+            session.query(SchemaTable).delete()
             session.commit()
 
     def clear_and_close(self) -> None:
