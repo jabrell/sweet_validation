@@ -11,7 +11,7 @@ class InMemoryRegistry:
     _data_store: InMemoryStorage
 
     def __init__(self) -> None:
-        self.manager = SchemaManager()
+        self.manager = SchemaManager(storage=InMemoryStorage())
         self._schema_store = InMemoryStorage()
         self._data_store = InMemoryStorage()
 
