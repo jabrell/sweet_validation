@@ -83,7 +83,7 @@ class InMemoryRegistry:
         Returns:
             list[str]: List of schema keys
         """
-        return self.manager.list_schemas()
+        return self.manager.schemas
 
     def add_data(self, key: str, schema_key: str, data: Any) -> None:
         """Add data to the registry. The data is validated given the schema.

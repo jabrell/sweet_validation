@@ -19,9 +19,9 @@ def cleanup_db_file():
 @pytest.mark.parametrize("fn", [None, db_file])
 def test_insert_schema(fn: str):
     relation_manager = SchemaManager(fn=fn)
-    assert relation_manager.list_schemas() == []
+    assert relation_manager.schemas == []
     relation_manager.insert_schema(id="test")
-    assert relation_manager.list_schemas() == ["test"]
+    assert relation_manager.schemas == ["test"]
     # raise IntegrityError due to unique constraint of primary key
     with pytest.raises(IntegrityError):
         relation_manager.insert_schema("test")
@@ -47,9 +47,9 @@ def test_insert_data(fn: str):
 def test_delete_schema(fn: str):
     relation_manager = SchemaManager(fn=fn)
     relation_manager.insert_schema(id="test")
-    assert relation_manager.list_schemas() == ["test"]
+    assert relation_manager.schemas == ["test"]
     relation_manager.delete_schema(id="test")
-    assert relation_manager.list_schemas() == []
+    assert relation_manager.schemas == []
     # raise exception due to foreign key constraint
     relation_manager.insert_schema(id="test")
     relation_manager.insert_data(id="test", id_schema="test")
@@ -85,6 +85,6 @@ def test_init_from_existing_db():
     relation_manager.close()
     relation_manager2 = SchemaManager(fn=db_file)
     assert relation_manager2.get_data_schema(id="test") == "s_test"
-    assert relation_manager2.list_schemas() == ["s_test"]
+    assert relation_manager2.schemas == ["s_test"]
     assert relation_manager2.list_data() == [("test", "s_test")]
     relation_manager2.clear_and_close()

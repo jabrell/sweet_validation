@@ -86,13 +86,34 @@ class SchemaManager:
             meta_schema = Schema(meta_schema)
         self._meta_schema = meta_schema
         # create the engine and the tables
-        if fn:
-            self._conn_str = f"sqlite:///{fn}"
-        else:
-            self._conn_str = "sqlite:///:memory:"
+        conn_str = f"sqlite:///{fn}" if fn else "sqlite:///:memory:"
+        self.init_db(conn_str)
+
+    # db management methods
+    def init_db(self, conn_str: str) -> None:
+        """Initialize the database with the metadata schema
+
+        Args:
+            conn_str (str): Connection string to the database
+        """
+        self._conn_str = conn_str
         self.engine = create_engine(self._conn_str)
         Base.metadata.create_all(self.engine)  # Create tables if they don't exist
         self.SessionLocal = sessionmaker(bind=self.engine)  # Create session factory
+
+    def close(self) -> None:
+        self.close_engine()
+
+    def clear_all(self) -> None:
+        """Clear all data in the database"""
+        with self.get_session() as session:
+            session.query(DataTable).delete()
+            session.query(SchemaTable).delete()
+            session.commit()
+
+    def clear_and_close(self) -> None:
+        self.clear_all()
+        self.close()
 
     @contextmanager
     def get_session(self) -> Generator[Session, None, None]:
@@ -111,6 +132,7 @@ class SchemaManager:
         """Close the database engine."""
         self.engine.dispose()
 
+    # schema management methods
     def insert_schema(self, id: str) -> None:
         """Insert a schema into the database given the key
 
@@ -138,7 +160,8 @@ class SchemaManager:
             session.add(DataTable(id=id, id_schema=id_schema))
             session.commit()
 
-    def list_schemas(self) -> list[str]:
+    @property
+    def schemas(self) -> list[str]:
         """Fetch all schema keys
 
         Returns:
@@ -146,17 +169,6 @@ class SchemaManager:
         """
         with self.get_session() as session:
             return [schema.id for schema in session.query(SchemaTable).all()]
-
-    def list_data(self) -> list[tuple[str, str]]:
-        """Fetch all data
-
-        Returns:
-            list[tuple[str, str]]: List of data tuples (id, id_schema)
-        """
-        with self.get_session() as session:
-            return [
-                (data.id, data.id_schema) for data in session.query(DataTable).all()
-            ]
 
     def delete_schema(self, id: str) -> None:
         """Delete a schema given the key
@@ -171,6 +183,33 @@ class SchemaManager:
         with self.get_session() as session:
             session.query(SchemaTable).filter(SchemaTable.id == id).delete()
             session.commit()
+
+    def list_data_for_schema(self, id_schema: str) -> list[str]:
+        """Get the data keys associated with the schema key
+
+        Args:
+            id_schema (str): Schema key
+
+        Returns:
+            list[str]: List of data keys
+        """
+        with self.get_session() as session:
+            data = (
+                session.query(DataTable).filter(DataTable.id_schema == id_schema).all()
+            )
+            return [str(d.id) for d in data]
+
+    # data management methods
+    def list_data(self) -> list[tuple[str, str]]:
+        """Fetch all data
+
+        Returns:
+            list[tuple[str, str]]: List of data tuples (id, id_schema)
+        """
+        with self.get_session() as session:
+            return [
+                (data.id, data.id_schema) for data in session.query(DataTable).all()
+            ]
 
     def delete_data(self, id: str) -> None:
         """Delete data given the key
@@ -199,32 +238,3 @@ class SchemaManager:
             if not data:
                 raise KeyError(f"Data key '{id}' not found")
             return str(data.id_schema)
-
-    def list_data_for_schema(self, id_schema: str) -> list[str]:
-        """Get the data keys associated with the schema key
-
-        Args:
-            id_schema (str): Schema key
-
-        Returns:
-            list[str]: List of data keys
-        """
-        with self.get_session() as session:
-            data = (
-                session.query(DataTable).filter(DataTable.id_schema == id_schema).all()
-            )
-            return [str(d.id) for d in data]
-
-    def close(self) -> None:
-        self.close_engine()
-
-    def clear_all(self) -> None:
-        """Clear all data in the database"""
-        with self.get_session() as session:
-            session.query(DataTable).delete()
-            session.query(SchemaTable).delete()
-            session.commit()
-
-    def clear_and_close(self) -> None:
-        self.clear_all()
-        self.close()
