@@ -10,7 +10,6 @@ from frictionless import Schema
 from sqlalchemy import Engine, create_engine, event
 from sqlalchemy.orm import Session, sessionmaker
 
-from ..storage import InMemoryStorage
 from .models import Base
 from .models import Data as DataTable
 from .models import Schema as SchemaTable
@@ -71,7 +70,6 @@ class SchemaManager:
 
     def __init__(
         self,
-        storage: InMemoryStorage,
         fn_db: str | None = None,
         meta_schema: str | Schema | None = None,
     ) -> None:
@@ -84,17 +82,28 @@ class SchemaManager:
                 Defaults to None, which uses the default schema. If a string is
                 provided it is assumed to be a path to a schema file in yaml format.
         """
-        self._storage = storage
         # create the meta-data schema
         meta_schema = meta_schema or DEFAULT_SCHEMA
-        if isinstance(meta_schema, str | Path):
-            with open(meta_schema) as f:
-                meta_schema = yaml.safe_load(f)
-            meta_schema = Schema(meta_schema)
-        self._meta_schema = meta_schema
+        self._meta_schema = self._create_schema_from_file(meta_schema)
         # create the engine and the tables
         conn_str = f"sqlite:///{fn_db}" if fn_db else "sqlite:///:memory:"
         self._init_db(conn_str)
+
+    def _create_schema_from_file(self, schema: str | Schema) -> Schema:
+        """Create a schema from file and return the scheme itself it is already a
+        schema
+
+        Args:
+            schema (str | Schema): Schema or path to schema file
+
+        Returns:
+            Schema: Schema
+        """
+        if isinstance(schema, str | Path):
+            with open(schema) as f:
+                schema = yaml.safe_load(f)
+            schema = Schema(schema)
+        return schema
 
     # schema management methods
     @property
@@ -126,7 +135,7 @@ class SchemaManager:
                 raise KeyError(f"Schema key '{key}' not found")
             return str(schema.id)
 
-    def add_schema(self, key: str) -> None:
+    def add_schema(self, key: str, schema: str | Schema) -> None:
         """Insert a schema into the database given the key
 
         Args:
@@ -135,6 +144,8 @@ class SchemaManager:
         Raises:
             IntegrityError: If the primary key is violated
         """
+        schema = self._create_schema_from_file(schema)
+
         # TODO add schema validation
         with self.get_session() as session:
             session.add(SchemaTable(id=key))

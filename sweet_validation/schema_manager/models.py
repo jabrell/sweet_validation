@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from sqlalchemy import ForeignKey
+from sqlalchemy import TEXT, ForeignKey
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
 
@@ -13,6 +13,7 @@ class Schema(Base):
 
     id: Mapped[str] = mapped_column(primary_key=True)
     data_items: Mapped[list[Data]] = relationship(back_populates="schema")
+    schema: Mapped[str] = mapped_column(TEXT, nullable=False)
 
 
 class Data(Base):
