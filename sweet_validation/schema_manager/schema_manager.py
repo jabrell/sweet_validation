@@ -10,7 +10,7 @@ from frictionless import Schema
 from sqlalchemy import Engine, create_engine, event
 from sqlalchemy.orm import Session, sessionmaker
 
-from ..storage import StorageProtocol
+from ..storage import InMemoryStorage
 from .models import Base
 from .models import Data as DataTable
 from .models import Schema as SchemaTable
@@ -71,7 +71,7 @@ class SchemaManager:
 
     def __init__(
         self,
-        storage: StorageProtocol,
+        storage: InMemoryStorage,
         fn_db: str | None = None,
         meta_schema: str | Schema | None = None,
     ) -> None:
