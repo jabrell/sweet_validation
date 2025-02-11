@@ -10,6 +10,7 @@ from frictionless import Schema
 from sqlalchemy import Engine, create_engine, event
 from sqlalchemy.orm import Session, sessionmaker
 
+from ..storage import StorageProtocol
 from .models import Base
 from .models import Data as DataTable
 from .models import Schema as SchemaTable
@@ -46,38 +47,44 @@ class SchemaManager:
     The database has two tables: Schema and Data. Schema
 
     Attributes:
-        engine (Engine): SQLAlchemy engine
-        SessionLocal (sessionmaker): Session factory
+        schemas: List of schema keys
 
     Methods:
-        get_session: Provides a context-managed database session
-        close_engine: Close the database engine
+        # schema management methods
         insert_schema: Insert a schema into the database
-        insert_data: Insert data into the database
-        list_schemas: Fetch all schema keys
-        list_data: Fetch all data
         delete_schema: Delete a schema given the key
+        list_data_for_schema: Get the data keys associated with the schema key
+
+        # data management methods
+        insert_data: Insert data into the database
+        list_data: Fetch all data keys
         delete_data: Delete data given the key
         get_data_schema: Get the schema key associated with the data key
+
+        # db management methods
+        get_session: Provides a context-managed database session
+        close_engine: Close the database engine
         close: Close the database engine
-        clear_all: Clear all data in the database
+        clear: Clear all tables in the database
         clear_and_close: Clear all data and close the database engine
     """
 
-    _conn_str: str
-    _meta_schema: Schema
-
     def __init__(
-        self, fn: str | None = None, meta_schema: str | Schema | None = None
+        self,
+        storage: StorageProtocol,
+        fn_db: str | None = None,
+        meta_schema: str | Schema | None = None,
     ) -> None:
         """Initialize the database engine and session factory
         Args:
+            storage (StorageProtocol): Storage to store the schemas
             fn (str | None): Filename of the sqlite database
                 Defaults to None, which uses an in-memory database
             meta_schema (str | Schema | None): Metadata schema for the database
                 Defaults to None, which uses the default schema. If a string is
                 provided it is assumed to be a path to a schema file in yaml format.
         """
+        self._storage = storage
         # create the meta-data schema
         meta_schema = meta_schema or DEFAULT_SCHEMA
         if isinstance(meta_schema, str | Path):
@@ -86,66 +93,81 @@ class SchemaManager:
             meta_schema = Schema(meta_schema)
         self._meta_schema = meta_schema
         # create the engine and the tables
-        conn_str = f"sqlite:///{fn}" if fn else "sqlite:///:memory:"
-        self.init_db(conn_str)
-
-    # db management methods
-    def init_db(self, conn_str: str) -> None:
-        """Initialize the database with the metadata schema
-
-        Args:
-            conn_str (str): Connection string to the database
-        """
-        self._conn_str = conn_str
-        self.engine = create_engine(self._conn_str)
-        Base.metadata.create_all(self.engine)  # Create tables if they don't exist
-        self.SessionLocal = sessionmaker(bind=self.engine)  # Create session factory
-
-    def close(self) -> None:
-        self.close_engine()
-
-    def clear_all(self) -> None:
-        """Clear all data in the database"""
-        with self.get_session() as session:
-            session.query(DataTable).delete()
-            session.query(SchemaTable).delete()
-            session.commit()
-
-    def clear_and_close(self) -> None:
-        self.clear_all()
-        self.close()
-
-    @contextmanager
-    def get_session(self) -> Generator[Session, None, None]:
-        """Provides a context-managed database session."""
-        session = self.SessionLocal()
-        try:
-            yield session
-            session.commit()
-        except Exception as e:
-            session.rollback()
-            raise e  # Re-raise after rollback
-        finally:
-            session.close()
-
-    def close_engine(self) -> None:
-        """Close the database engine."""
-        self.engine.dispose()
+        conn_str = f"sqlite:///{fn_db}" if fn_db else "sqlite:///:memory:"
+        self._init_db(conn_str)
 
     # schema management methods
-    def insert_schema(self, id: str) -> None:
+    @property
+    def schemas(self) -> list[str]:
+        """Fetch all schema keys
+
+        Returns:
+            list[str]: List of schema keys
+        """
+        with self.get_session() as session:
+            return [schema.id for schema in session.query(SchemaTable).all()]
+
+    # todo fix output type here
+    def __getitem__(self, key: str) -> str:
+        """Get the schema given the key
+
+        Args:
+            key (str): Schema key
+
+        Raises:
+            KeyError: If the schema key does not exist
+
+        Returns:
+            str: Schema
+        """
+        with self.get_session() as session:
+            schema = session.query(SchemaTable).filter(SchemaTable.id == key).first()
+            if not schema:
+                raise KeyError(f"Schema key '{key}' not found")
+            return str(schema.id)
+
+    def add_schema(self, key: str) -> None:
         """Insert a schema into the database given the key
 
         Args:
-            id (str): Schema key
+            key (str): Schema key
 
         Raises:
             IntegrityError: If the primary key is violated
         """
+        # TODO add schema validation
         with self.get_session() as session:
-            session.add(SchemaTable(id=id))
+            session.add(SchemaTable(id=key))
             session.commit()
 
+    def delete_schema(self, key: str) -> None:
+        """Delete a schema given the key
+
+        Args:
+            key (str): Schema key
+
+        Raises:
+            IntegrityError: If the foreign key constraint of data is violated,
+                i.e. data associated with the schema still exist
+        """
+        with self.get_session() as session:
+            session.query(SchemaTable).filter(SchemaTable.id == key).delete()
+            session.commit()
+
+    def list_data_for_schema(self, key: str) -> list[str]:
+        """Get the data keys associated with the schema key
+
+        Args:
+            key (str): Schema key
+
+        Returns:
+            list[str]: List of data keys
+        """
+        with self.get_session() as session:
+            data = session.query(DataTable).filter(DataTable.id_schema == key).all()
+            return [str(d.id) for d in data]
+
+    # data management methods
     def insert_data(self, id: str, id_schema: str) -> None:
         """Insert data into the database given the key and key of associated schema
 
@@ -160,46 +182,6 @@ class SchemaManager:
             session.add(DataTable(id=id, id_schema=id_schema))
             session.commit()
 
-    @property
-    def schemas(self) -> list[str]:
-        """Fetch all schema keys
-
-        Returns:
-            list[str]: List of schema keys
-        """
-        with self.get_session() as session:
-            return [schema.id for schema in session.query(SchemaTable).all()]
-
-    def delete_schema(self, id: str) -> None:
-        """Delete a schema given the key
-
-        Args:
-            id (str): Schema key
-
-        Raises:
-            IntegrityError: If the foreign key constraint of data is violated,
-                i.e. data associated with the schema still exist
-        """
-        with self.get_session() as session:
-            session.query(SchemaTable).filter(SchemaTable.id == id).delete()
-            session.commit()
-
-    def list_data_for_schema(self, id_schema: str) -> list[str]:
-        """Get the data keys associated with the schema key
-
-        Args:
-            id_schema (str): Schema key
-
-        Returns:
-            list[str]: List of data keys
-        """
-        with self.get_session() as session:
-            data = (
-                session.query(DataTable).filter(DataTable.id_schema == id_schema).all()
-            )
-            return [str(d.id) for d in data]
-
-    # data management methods
     def list_data(self) -> list[tuple[str, str]]:
         """Fetch all data
 
@@ -238,3 +220,47 @@ class SchemaManager:
             if not data:
                 raise KeyError(f"Data key '{id}' not found")
             return str(data.id_schema)
+
+    # db management methods
+    def _init_db(self, conn_str: str) -> None:
+        """Initialize the database with the metadata schema
+
+        Args:
+            conn_str (str): Connection string to the database
+        """
+        self._conn_str = conn_str
+        self._engine = create_engine(self._conn_str)
+        Base.metadata.create_all(self._engine)  # Create tables if they don't exist
+        self._SessionLocal = sessionmaker(bind=self._engine)  # Create session factory
+
+    def _close_engine(self) -> None:
+        """Close the database engine."""
+        self._engine.dispose()
+        self._engine = None
+
+    def close(self) -> None:
+        self._close_engine()
+
+    def clear(self) -> None:
+        """Clear all data in the database"""
+        with self.get_session() as session:
+            session.query(DataTable).delete()
+            session.query(SchemaTable).delete()
+            session.commit()
+
+    def clear_and_close(self) -> None:
+        self.clear()
+        self.close()
+
+    @contextmanager
+    def get_session(self) -> Generator[Session, None, None]:
+        """Provides a context-managed database session."""
+        session = self._SessionLocal()
+        try:
+            yield session
+            session.commit()
+        except Exception as e:
+            session.rollback()
+            raise e  # Re-raise after rollback
+        finally:
+            session.close()

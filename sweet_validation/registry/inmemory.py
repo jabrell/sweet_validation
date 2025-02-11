@@ -2,13 +2,13 @@ import logging
 from typing import Any
 
 from ..schema_manager import SchemaManager
-from ..storage import InMemoryStorage
+from ..storage import InMemoryStorage, StorageProtocol
 
 
 class InMemoryRegistry:
     manager: SchemaManager
-    _schema_store: InMemoryStorage
-    _data_store: InMemoryStorage
+    _schema_store: StorageProtocol
+    _data_store: StorageProtocol
 
     def __init__(self) -> None:
         self.manager = SchemaManager()
@@ -27,7 +27,7 @@ class InMemoryRegistry:
             IntegrityError: If the schema already exists
         """
         # TODO check schema against metadata standard
-        self.manager.insert_schema(id=key)
+        self.manager.add_schema(key=key)
         self._schema_store.save(key, schema)
 
     def get_schema(self, key: str) -> Any:
@@ -54,7 +54,7 @@ class InMemoryRegistry:
             IntegrityError: If the schema does not exist or data associated with
                 the schema still exist
         """
-        self.manager.delete_schema(id=key)
+        self.manager.delete_schema(key=key)
         self._schema_store.delete(key)
 
     def replace_schema(self, key: str, schema: Any) -> None:
