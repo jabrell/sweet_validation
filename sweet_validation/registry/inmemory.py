@@ -2,13 +2,13 @@ import logging
 from typing import Any
 
 from ..schema_manager import SchemaManager
-from ..storage import InMemoryStorage, StorageProtocol
+from ..storage import InMemoryStorage
 
 
 class InMemoryRegistry:
     manager: SchemaManager
-    _schema_store: StorageProtocol
-    _data_store: StorageProtocol
+    _schema_store: InMemoryStorage
+    _data_store: InMemoryStorage
 
     def __init__(self) -> None:
         self.manager = SchemaManager()
