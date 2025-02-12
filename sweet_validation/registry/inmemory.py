@@ -11,7 +11,7 @@ class InMemoryRegistry:
     _data_store: InMemoryStorage
 
     def __init__(self) -> None:
-        self.manager = SchemaManager(storage=InMemoryStorage())
+        self.manager = SchemaManager()
         self._schema_store = InMemoryStorage()
         self._data_store = InMemoryStorage()
 
@@ -27,7 +27,7 @@ class InMemoryRegistry:
             IntegrityError: If the schema already exists
         """
         # TODO check schema against metadata standard
-        self.manager.add_schema(key=key)
+        self.manager.add_schema(key=key, schema=schema)
         self._schema_store.save(key, schema)
 
     def get_schema(self, key: str) -> Any:
