@@ -100,7 +100,7 @@ class InMemoryRegistry:
         schema = self.get_schema(schema_key)
         # TODO check data against schema
         logging.info(f"Data: {data} Schema: {schema}")
-        self.manager.insert_data(id=key, id_schema=schema_key)
+        self.manager.insert_data(key=key, key_schema=schema_key)
         self._data_store.save(key, data)
 
     def get_data(self, key: str) -> Any:
@@ -126,7 +126,7 @@ class InMemoryRegistry:
         Raises:
             IntegrityError: If the data does not exist
         """
-        self.manager.delete_data(id=key)
+        self.manager.delete_data(key=key)
         self._data_store.delete(key)
 
     def replace_data(self, key: str, data: Any) -> None:

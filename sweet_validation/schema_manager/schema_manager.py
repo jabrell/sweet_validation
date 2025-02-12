@@ -75,7 +75,6 @@ class SchemaManager:
     ) -> None:
         """Initialize the database engine and session factory
         Args:
-            storage (StorageProtocol): Storage to store the schemas
             fn (str | None): Filename of the sqlite database
                 Defaults to None, which uses an in-memory database
             meta_schema (str | Schema | None): Metadata schema for the database
@@ -105,7 +104,7 @@ class SchemaManager:
             schema = Schema(schema)
         return schema
 
-    # schema management methods
+    # --------- schema management methods
     @property
     def schemas(self) -> list[str]:
         """Fetch all schema keys
@@ -133,7 +132,7 @@ class SchemaManager:
             schema = session.query(SchemaTable).filter(SchemaTable.id == key).first()
             if not schema:
                 raise KeyError(f"Schema key '{key}' not found")
-            return str(schema.id)
+            return str(schema.schema)
 
     def add_schema(self, key: str, schema: str | Schema) -> None:
         """Insert a schema into the database given the key
@@ -142,13 +141,15 @@ class SchemaManager:
             key (str): Schema key
 
         Raises:
-            IntegrityError: If the primary key is violated
+            KeyError: If the schema key already exists
         """
-        schema = self._create_schema_from_file(schema)
-
+        if key in self.schemas:
+            raise KeyError(f"Schema key '{key}' already exists")
         # TODO add schema validation
+        # schema = self._create_schema_from_file(schema)
+
         with self.get_session() as session:
-            session.add(SchemaTable(id=key))
+            session.add(SchemaTable(id=key, schema=schema))
             session.commit()
 
     def delete_schema(self, key: str) -> None:
@@ -158,9 +159,13 @@ class SchemaManager:
             key (str): Schema key
 
         Raises:
-            IntegrityError: If the foreign key constraint of data is violated,
-                i.e. data associated with the schema still exist
+            KeyError: If schema does not exist
+            ValueError: If some data is still associated with the schema
         """
+        if key not in self.schemas:
+            raise KeyError(f"Schema key '{key}' not found")
+        if self.list_data_for_schema(key):
+            raise ValueError(f"Data associated with schema key '{key}' still exists")
         with self.get_session() as session:
             session.query(SchemaTable).filter(SchemaTable.id == key).delete()
             session.commit()
@@ -178,19 +183,19 @@ class SchemaManager:
             data = session.query(DataTable).filter(DataTable.id_schema == key).all()
             return [str(d.id) for d in data]
 
-    # data management methods
-    def insert_data(self, id: str, id_schema: str) -> None:
+    # --------- data management methods
+    def insert_data(self, key: str, key_schema: str) -> None:
         """Insert data into the database given the key and key of associated schema
 
         Args:
-            id (str): Data key
-            id_schema (str): Schema key
+            key (str): Data key
+            key_schema (str): Schema key
 
         Raises:
             IntegrityError: If the primary key or foreign constraint is violated
         """
         with self.get_session() as session:
-            session.add(DataTable(id=id, id_schema=id_schema))
+            session.add(DataTable(id=key, id_schema=key_schema))
             session.commit()
 
     def list_data(self) -> list[tuple[str, str]]:
@@ -204,21 +209,42 @@ class SchemaManager:
                 (data.id, data.id_schema) for data in session.query(DataTable).all()
             ]
 
-    def delete_data(self, id: str) -> None:
+    def delete_data(self, key: str) -> None:
         """Delete data given the key
 
         Args:
-            id (str): Data key
+            key (str): Data key
+
+        Raises:
+            KeyError: If the data key does not exist
         """
+        if key not in [d[0] for d in self.list_data()]:
+            raise KeyError(f"Data key '{key}' not found")
         with self.get_session() as session:
-            session.query(DataTable).filter(DataTable.id == id).delete()
+            session.query(DataTable).filter(DataTable.id == key).delete()
             session.commit()
 
-    def get_data_schema(self, id: str) -> str:
+    # todo fix output type here
+    def get_data_schema(self, key: str) -> str:
         """Get the schema key associated with the data key
 
         Args:
-            id (str): Data key
+            key (str): Data key
+
+        raises:
+            KeyError: If the data key does not exist
+
+        Returns:
+            str: Schema
+        """
+        key_schema = self.get_data_schema_key(key)
+        return self[key_schema]
+
+    def get_data_schema_key(self, key: str) -> str:
+        """Get the schema key associated with the data key
+
+        Args:
+            key (str): Data key
 
         raises:
             KeyError: If the data key does not exist
@@ -227,12 +253,12 @@ class SchemaManager:
             str: Schema key
         """
         with self.get_session() as session:
-            data = session.query(DataTable).filter(DataTable.id == id).first()
+            data = session.query(DataTable).filter(DataTable.id == key).first()
             if not data:
-                raise KeyError(f"Data key '{id}' not found")
+                raise KeyError(f"Data key '{key}' not found")
             return str(data.id_schema)
 
-    # db management methods
+    # --------- db management methods
     def _init_db(self, conn_str: str) -> None:
         """Initialize the database with the metadata schema
 
