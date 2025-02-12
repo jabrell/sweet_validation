@@ -72,13 +72,13 @@ def test_replace_schema():
     assert registry.get_schema("skey") == "new_schema"
 
 
-# def test_replace_data():
-#     registry = InMemoryRegistry()
-#     # raise KeyError if data does not exist
-#     with pytest.raises(KeyError):
-#         registry.replace_data("key", "data")
+def test_replace_data():
+    registry = InMemoryRegistry()
+    # raise KeyError if data does not exist
+    with pytest.raises(KeyError):
+        registry.replace_data("key", "data")
 
-#     registry.add_schema("skey", "schema")
-#     registry.add_data("dkey", "skey", data="data")
-#     registry.replace_data("dkey", "new_data")
-#     assert registry.get_data("dkey") == "new_data"
+    registry.add_schema("skey", "schema")
+    registry.add_data("dkey", "skey", data="data")
+    registry.replace_data("dkey", "new_data")
+    assert registry.get_data("dkey") == "new_data"

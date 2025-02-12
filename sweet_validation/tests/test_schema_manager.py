@@ -1,7 +1,6 @@
 from pathlib import Path
 
 import pytest
-from sqlalchemy.exc import IntegrityError
 
 from ..schema_manager import SchemaManager
 
@@ -16,6 +15,7 @@ def cleanup_db_file():
         db_path.unlink()
 
     yield
+
     db_path = Path(db_file)
     if db_path.exists():
         db_path.unlink()
@@ -82,10 +82,10 @@ def test_insert_data(fn: str):
     relation_manager.insert_data(key="test", key_schema="test")
     assert relation_manager.list_data() == [("test", "test")]
     # raise IntegrityError due to unique constraint of primary key
-    with pytest.raises(IntegrityError):
+    with pytest.raises(KeyError):
         relation_manager.insert_data("test", "test")
     # raise exception due to foreign key constraint
-    with pytest.raises(IntegrityError):
+    with pytest.raises(KeyError):
         relation_manager.insert_data("test2", "test2")
     relation_manager.clear_and_close()
 

@@ -220,8 +220,10 @@ class SchemaManager:
             key_schema (str): Schema key
 
         Raises:
-            IntegrityError: If the primary key or foreign constraint is violated
+            KeyError: If the primary key or foreign constraint is violated
         """
+        if key in self.data:
+            raise KeyError(f"Data key '{key}' already exists")
         if key_schema not in self.schemas:
             raise KeyError(f"Schema key '{key_schema}' not found")
         with self.get_session() as session:

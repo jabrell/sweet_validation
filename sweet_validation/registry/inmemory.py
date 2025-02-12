@@ -7,11 +7,16 @@ from ..storage import InMemoryStorage
 
 class InMemoryRegistry:
     schema_manager: SchemaManager
-    _schema_store: InMemoryStorage
     _data_store: InMemoryStorage
 
-    def __init__(self) -> None:
-        self.schema_manager = SchemaManager()
+    def __init__(self, fn_schema_db: str | None = None) -> None:
+        """Initialize the registry with schema manager and storage
+
+        Args:
+            fn_schema_db (str | None, optional): Filename of schema database.
+                Defaults to None.
+        """
+        self.schema_manager = SchemaManager(fn_db=fn_schema_db)
         self._data_store = InMemoryStorage()
 
     # -------- schema related methods
