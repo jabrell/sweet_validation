@@ -70,7 +70,7 @@ class SchemaManager:
     def __init__(
         self,
         fn_db: str | None = None,
-        meta_schema: str | None = None,
+        meta_schema: str | Path | None = None,
     ) -> None:
         """Initialize the database engine and session factory
         Args:
@@ -81,13 +81,13 @@ class SchemaManager:
                 provided it is assumed to be a path to a schema file in yaml format.
         """
         # create the meta-data schema
-        meta_schema = meta_schema or DEFAULT_SCHEMA
-        self._meta_schema = self._create_schema_from_file(meta_schema)
+        # meta_schema = meta_schema or DEFAULT_SCHEMA
+        # self._meta_schema = self._create_schema_from_file(meta_schema)
         # create the engine and the tables
         conn_str = f"sqlite:///{fn_db}" if fn_db else "sqlite:///:memory:"
         self._init_db(conn_str)
 
-    def _create_schema_from_file(self, schema: str) -> str:
+    def _create_schema_from_file(self, schema: str | Path) -> str:
         """Create a schema from file and return the scheme itself it is already a
         schema
 
