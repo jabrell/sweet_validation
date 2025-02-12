@@ -170,6 +170,25 @@ class SchemaManager:
             session.query(SchemaTable).filter(SchemaTable.id == key).delete()
             session.commit()
 
+    def replace_schema(self, key: str, schema: str | Schema) -> None:
+        """Replace a schema in the database
+
+        Args:
+            key (str): Schema key
+            schema (str | Schema): New schema
+
+        Raises:
+            KeyError: If the schema key does not exist
+        """
+        if key not in self.schemas:
+            raise KeyError(f"Schema key '{key}' not found")
+        # TODO add schema validation
+        with self.get_session() as session:
+            session.query(SchemaTable).filter(SchemaTable.id == key).update(
+                {"schema": schema}
+            )
+            session.commit()
+
     def list_data_for_schema(self, key: str) -> list[str]:
         """Get the data keys associated with the schema key
 
@@ -184,6 +203,15 @@ class SchemaManager:
             return [str(d.id) for d in data]
 
     # --------- data management methods
+    @property
+    def data(self) -> list[str]:
+        """List of all data keys
+
+        Returns:
+            list[str]: List of data keys
+        """
+        return [d[0] for d in self.list_data()]
+
     def insert_data(self, key: str, key_schema: str) -> None:
         """Insert data into the database given the key and key of associated schema
 
@@ -194,6 +222,8 @@ class SchemaManager:
         Raises:
             IntegrityError: If the primary key or foreign constraint is violated
         """
+        if key_schema not in self.schemas:
+            raise KeyError(f"Schema key '{key_schema}' not found")
         with self.get_session() as session:
             session.add(DataTable(id=key, id_schema=key_schema))
             session.commit()

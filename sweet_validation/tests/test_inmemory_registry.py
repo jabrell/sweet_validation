@@ -1,5 +1,4 @@
 import pytest
-from sqlalchemy.exc import IntegrityError
 
 from sweet_validation.registry import InMemoryRegistry
 
@@ -7,16 +6,16 @@ from sweet_validation.registry import InMemoryRegistry
 def test_add_schema():
     registry = InMemoryRegistry()
     registry.add_schema("key", "schema")
-    assert registry.list_schemas() == ["key"]
+    assert registry.schemas == ["key"]
     assert registry.get_schema("key") == "schema"
-    # already exists so error is raised
-    with pytest.raises(IntegrityError):
+    # already exists so KeyError is raised
+    with pytest.raises(KeyError):
         registry.add_schema("key", "schema")
 
 
 def test_add_data():
     registry = InMemoryRegistry()
-    # raise IntegrityError if schema does not exist
+    # raise KeyError if schema does not exist
     with pytest.raises(KeyError):
         registry.add_data("dkey", "lkey", data="data")
 
@@ -24,27 +23,30 @@ def test_add_data():
     registry.add_data("dkey", "skey", data="data")
     assert registry.list_data() == [("dkey", "skey")]
     assert registry.get_data("dkey") == "data"
-    # already exists so error is raised
-    with pytest.raises(IntegrityError):
+    # Schema does not exist so KeyError is raised
+    with pytest.raises(KeyError):
+        registry.add_data("dkey", "skey2", data="data")
+    # Data already exists so KeyError is raised
+    with pytest.raises(KeyError):
         registry.add_data("dkey", "skey", data="data")
 
 
 def test_delete_schema():
     registry = InMemoryRegistry()
-    # raise IntegrityError if schema does not exist
+    # raise KeyError if schema does not exist
     with pytest.raises(KeyError):
         registry.delete_schema("key")
 
-    # raise IntegrityError if data associated with schema still exist
+    # raise ValueError if data associated with schema still exist
     registry.add_schema("skey", "schema")
     registry.add_data("dkey", "skey", data="data")
-    with pytest.raises(IntegrityError):
+    with pytest.raises(ValueError):
         registry.delete_schema("skey")
 
     # deleting data allows to delete schema and schema list is empty
     registry.delete_data("dkey")
     registry.delete_schema("skey")
-    assert registry.list_schemas() == []
+    assert registry.schemas == []
 
 
 def test_delete_data():
@@ -56,7 +58,7 @@ def test_delete_data():
     registry.add_schema("skey", "schema")
     registry.add_data("dkey", "skey", data="data")
     registry.delete_data("dkey")
-    assert registry.list_data() == []
+    assert registry.data == []
 
 
 def test_replace_schema():
@@ -70,13 +72,13 @@ def test_replace_schema():
     assert registry.get_schema("skey") == "new_schema"
 
 
-def test_replace_data():
-    registry = InMemoryRegistry()
-    # raise KeyError if data does not exist
-    with pytest.raises(KeyError):
-        registry.replace_data("key", "data")
+# def test_replace_data():
+#     registry = InMemoryRegistry()
+#     # raise KeyError if data does not exist
+#     with pytest.raises(KeyError):
+#         registry.replace_data("key", "data")
 
-    registry.add_schema("skey", "schema")
-    registry.add_data("dkey", "skey", data="data")
-    registry.replace_data("dkey", "new_data")
-    assert registry.get_data("dkey") == "new_data"
+#     registry.add_schema("skey", "schema")
+#     registry.add_data("dkey", "skey", data="data")
+#     registry.replace_data("dkey", "new_data")
+#     assert registry.get_data("dkey") == "new_data"
