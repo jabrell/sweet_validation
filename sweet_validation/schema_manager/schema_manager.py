@@ -5,8 +5,7 @@ from contextlib import contextmanager
 from pathlib import Path
 from typing import Any
 
-import yaml  # type: ignore
-from frictionless import Schema
+# import yaml  # type: ignore
 from sqlalchemy import Engine, create_engine, event
 from sqlalchemy.orm import Session, sessionmaker
 
@@ -71,7 +70,7 @@ class SchemaManager:
     def __init__(
         self,
         fn_db: str | None = None,
-        meta_schema: str | Schema | None = None,
+        meta_schema: str | None = None,
     ) -> None:
         """Initialize the database engine and session factory
         Args:
@@ -88,7 +87,7 @@ class SchemaManager:
         conn_str = f"sqlite:///{fn_db}" if fn_db else "sqlite:///:memory:"
         self._init_db(conn_str)
 
-    def _create_schema_from_file(self, schema: str | Schema) -> Schema:
+    def _create_schema_from_file(self, schema: str) -> str:
         """Create a schema from file and return the scheme itself it is already a
         schema
 
@@ -98,10 +97,11 @@ class SchemaManager:
         Returns:
             Schema: Schema
         """
-        if isinstance(schema, str | Path):
-            with open(schema) as f:
-                schema = yaml.safe_load(f)
-            schema = Schema(schema)
+        # TODO should only have schema checking here
+        # if isinstance(schema, str | Path):
+        #     with open(schema) as f:
+        #         schema = yaml.safe_load(f)
+        #     schema = Schema(schema)
         return schema
 
     # --------- schema management methods
@@ -134,7 +134,7 @@ class SchemaManager:
                 raise KeyError(f"Schema key '{key}' not found")
             return str(schema.schema)
 
-    def add_schema(self, key: str, schema: str | Schema) -> None:
+    def add_schema(self, key: str, schema: str) -> None:
         """Insert a schema into the database given the key
 
         Args:
@@ -170,7 +170,7 @@ class SchemaManager:
             session.query(SchemaTable).filter(SchemaTable.id == key).delete()
             session.commit()
 
-    def replace_schema(self, key: str, schema: str | Schema) -> None:
+    def replace_schema(self, key: str, schema: str) -> None:
         """Replace a schema in the database
 
         Args:
