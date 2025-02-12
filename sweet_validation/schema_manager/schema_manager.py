@@ -87,7 +87,7 @@ class SchemaManager:
         conn_str = f"sqlite:///{fn_db}" if fn_db else "sqlite:///:memory:"
         self._init_db(conn_str)
 
-    def _create_schema_from_file(self, schema: str | Path) -> str:
+    def _create_schema_from_file(self, schema: str) -> str:
         """Create a schema from file and return the scheme itself it is already a
         schema
 
