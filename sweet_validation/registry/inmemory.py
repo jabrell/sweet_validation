@@ -73,9 +73,12 @@ class InMemoryRegistry:
         """
         # ensure that new schema is valid
         self.schema_manager.validate_schema(schema)
+        # TODO check data against schema
+        # --> where is this done?
         for data_key in self.schema_manager.list_data_for_schema(key):
             data = self.get_data(data_key)
             self._validate_data(data=data, schema=schema)
+            logging.info(f"Data: {data} Schema: {schema}")
         # replacement
         self.schema_manager.replace_schema(key, schema)
 

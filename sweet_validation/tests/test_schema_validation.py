@@ -6,22 +6,7 @@ from jsonschema.exceptions import ValidationError
 
 from sweet_validation.schema_manager import SchemaManager
 
-valid_schema = {
-    "fields": [
-        {"name": "id", "type": "integer"},
-        {"name": "name", "type": "string"},
-    ],
-    "name": "test",
-}
-
-# this schema is missing the "name" key which is required (in addition to "fields")
-# in contrast to the original frictionless schema
-invalid_schema = {
-    "fields": [
-        {"name": "id", "type": "integer"},
-        {"name": "name", "type": "string"},
-    ],
-}
+from .schemas import invalid_schema, valid_schema
 
 
 def test_validate_schema_from_dict():
