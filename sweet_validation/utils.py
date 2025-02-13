@@ -23,7 +23,7 @@ def read_json_or_yaml(file: str | Path) -> dict[str, Any]:
         if file.suffix == ".json":
             return cast(dict[str, Any], json.load(f))
         elif file.suffix in [".yaml", ".yml"]:
-            return cast(dict[str, Any], yaml.safe_load(f))  # type: ignore
+            return cast(dict[str, Any], yaml.safe_load(f))
         else:
             raise ValueError(
                 f"File {file} is not json or yaml. Use .json, .yaml, or .yml"

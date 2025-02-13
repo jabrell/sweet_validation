@@ -288,7 +288,7 @@ class SchemaManager:
             session.commit()
 
     # todo fix output type here
-    def get_data_schema(self, key: str) -> str:
+    def get_data_schema(self, key: str) -> dict[str, Any]:
         """Get the schema key associated with the data key
 
         Args:
