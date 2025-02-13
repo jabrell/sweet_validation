@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, cast
 
 __all__ = ["TweakedValidator"]
 
@@ -40,4 +40,6 @@ class TweakedValidator:
         Returns:
             bool: True if valid else False
         """
-        return self.validate(data, schema, response=response)["valid"]
+        if self.validate(data, schema, response=response)["valid"]:
+            return True
+        return False
