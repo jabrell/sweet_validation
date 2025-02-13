@@ -1,4 +1,3 @@
-import logging
 from typing import Any
 
 from ..schema_manager import SchemaManager
@@ -9,7 +8,7 @@ class InMemoryRegistry:
     schema_manager: SchemaManager
     _data_store: InMemoryStorage
 
-    def __init__(self, fn_schema_db: str | None = None) -> None:
+    def __init__(self, validator: Any, fn_schema_db: str | None = None) -> None:
         """Initialize the registry with schema manager and storage
 
         Args:
@@ -17,6 +16,7 @@ class InMemoryRegistry:
                 Defaults to None.
         """
         self.schema_manager = SchemaManager(fn_db=fn_schema_db)
+        self.validator = validator
         self._data_store = InMemoryStorage()
 
     # -------- schema related methods
@@ -71,15 +71,11 @@ class InMemoryRegistry:
         Raises:
             KeyError: If the schema does not exist
         """
-        # TODO check schema against metadata standard
-        # --> Done by schema manager?
-        # TODO check data against schema
-        # --> where is this done?
-
+        # ensure that new schema is valid
+        self.schema_manager.validate_schema(schema)
         for data_key in self.schema_manager.list_data_for_schema(key):
             data = self.get_data(data_key)
-            logging.info(f"Data: {data} Schema: {schema}")
-        # TODO how to log schema changes. The old schema is not available after
+            self._validate_data(data=data, schema=schema)
         # replacement
         self.schema_manager.replace_schema(key, schema)
 
@@ -103,16 +99,14 @@ class InMemoryRegistry:
 
         Raises:
             KeyError: If the schema does not exist
-            ValidationError: If the data does not conform to the schema
         """
         if key in self.schema_manager.data:
             raise KeyError(f"Data {key} already exists")
         if schema_key not in self.schemas:
             raise KeyError(f"Schema {schema_key} does not exist")
-        schema = self.get_schema(schema_key)
-        # TODO check data against schema
-        # --> is that done here or by schema manager
-        logging.info(f"Data: {data} Schema: {schema}")
+        # validate data
+        self._validate_data(data=data, schema=self.get_schema(schema_key))
+        # add data
         self.schema_manager.add_data(key=key, key_schema=schema_key)
         self._data_store.save(key, data)
 
@@ -153,10 +147,9 @@ class InMemoryRegistry:
             KeyError: If the data does not exist
             ValidationError: If the data does not conform to the schema
         """
-        # TODO check data against schema
-        # TODO how to log data changes. The old data is not available after
         schema = self.schema_manager.get_data_schema(key)
-        logging.info(f"Validating Data: {data} Schema: {schema}")
+        # check data against schema
+        self._validate_data(data=data, schema=schema)
         # replacement
         self._data_store.replace(key, data)
 
@@ -170,6 +163,20 @@ class InMemoryRegistry:
             IntegrityError: If the data does not exist
         """
         return self.schema_manager.list_data()
+
+    def _validate_data(self, data: Any, schema: dict[str, Any]) -> None:
+        """Validate data against schema
+
+        Args:
+            data (Any): Data to be validated
+            schema (dict[str, Any]): Schema to validate against
+
+        Raises:
+            ValueError: If data does not conform to schema
+        """
+        # check data against schema
+        if not self.validator.is_valid(data, schema):
+            raise ValueError("Data does not conform to schema")
 
     @property
     def data(self) -> list[str]:

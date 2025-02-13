@@ -1,10 +1,11 @@
 import pytest
 
 from sweet_validation.registry import InMemoryRegistry
+from sweet_validation.validator.tweaked_validator import TweakedValidator
 
 
 def test_add_schema():
-    registry = InMemoryRegistry()
+    registry = InMemoryRegistry(validator=TweakedValidator())
     registry.add_schema("key", "schema")
     assert registry.schemas == ["key"]
     assert registry.get_schema("key") == "schema"
@@ -14,7 +15,7 @@ def test_add_schema():
 
 
 def test_add_data():
-    registry = InMemoryRegistry()
+    registry = InMemoryRegistry(validator=TweakedValidator())
     # raise KeyError if schema does not exist
     with pytest.raises(KeyError):
         registry.add_data("dkey", "lkey", data="data")
@@ -32,7 +33,7 @@ def test_add_data():
 
 
 def test_delete_schema():
-    registry = InMemoryRegistry()
+    registry = InMemoryRegistry(validator=TweakedValidator())
     # raise KeyError if schema does not exist
     with pytest.raises(KeyError):
         registry.delete_schema("key")
@@ -50,7 +51,7 @@ def test_delete_schema():
 
 
 def test_delete_data():
-    registry = InMemoryRegistry()
+    registry = InMemoryRegistry(validator=TweakedValidator())
     # raise KeyError if data does not exist
     with pytest.raises(KeyError):
         registry.delete_data("key")
@@ -62,7 +63,7 @@ def test_delete_data():
 
 
 def test_replace_schema():
-    registry = InMemoryRegistry()
+    registry = InMemoryRegistry(validator=TweakedValidator())
     # raise IntegrityError if schema does not exist
     with pytest.raises(KeyError):
         registry.replace_schema("key", "schema")
@@ -73,7 +74,7 @@ def test_replace_schema():
 
 
 def test_replace_data():
-    registry = InMemoryRegistry()
+    registry = InMemoryRegistry(validator=TweakedValidator())
     # raise KeyError if data does not exist
     with pytest.raises(KeyError):
         registry.replace_data("key", "data")
