@@ -47,6 +47,7 @@ def read_json_or_yaml(file: str | Path) -> dict[str, str]:
     Returns:
         dict: File contents
     """
+    file = Path(file)
     with open(file) as f:
         if file.suffix == ".json":
             return json.load(f)
