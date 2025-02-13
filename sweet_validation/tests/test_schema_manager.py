@@ -1,11 +1,14 @@
+import json
 from pathlib import Path
 
 import pytest
 
 from ..schema_manager import SchemaManager
+from .schemas import valid_schema
 
 db_file = Path("tmp.db")
-valid_schema = "content"
+dir_schema = Path(__file__).parent
+valid_schema_file = dir_schema / "valid_schema.json"
 
 
 @pytest.fixture(autouse=True, scope="module")
@@ -31,6 +34,18 @@ def test_add_schema(fn: str):
     # raise KeyError due to unique constraint of primary key
     with pytest.raises(KeyError):
         relation_manager.add_schema("test", schema="content")
+    relation_manager.clear_and_close()
+
+
+@pytest.mark.parametrize("fn", [None, db_file])
+def test_add_schema_from_file(fn: str):
+    relation_manager = SchemaManager(fn_db=fn)
+    with open(valid_schema_file, "w") as f:
+        json.dump(valid_schema, f)
+    relation_manager.add_schema(key="test", schema=valid_schema_file)
+    assert relation_manager.schemas == ["test"]
+    assert relation_manager["test"] == valid_schema
+    valid_schema_file.unlink()
     relation_manager.clear_and_close()
 
 
@@ -104,6 +119,8 @@ def test_delete_data(fn: str):
     relation_manager.clear_and_close()
 
 
+# TODO that likely needs to be revised to be more robust in terms of database
+# is consistent with schema
 def test_init_from_existing_db():
     relation_manager = SchemaManager(fn_db=db_file)
     relation_manager.add_schema(key="s_test", schema=valid_schema)

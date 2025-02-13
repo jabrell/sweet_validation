@@ -5,7 +5,7 @@ from typing import Any
 import yaml  # type: ignore
 
 
-def read_json_or_yaml(file: str | Path) -> dict[str, Any]:
+def read_json_or_yaml(file: str | Path) -> dict[str, Any]:  # type: ignore
     """Read a file in either json or yaml format
 
     Args:
@@ -21,9 +21,9 @@ def read_json_or_yaml(file: str | Path) -> dict[str, Any]:
     file = Path(file)
     with open(file) as f:
         if file.suffix == ".json":
-            return json.load(f)  # type: ignore
+            return json.load(f)
         elif file.suffix in [".yaml", ".yml"]:
-            return yaml.safe_load(f)  # type: ignore
+            return yaml.safe_load(f)
         else:
             raise ValueError(
                 f"File {file} is not json or yaml. Use .json, .yaml, or .yml"
