@@ -1,11 +1,12 @@
 from __future__ import annotations
 
+import json
 from collections.abc import Generator
 from contextlib import contextmanager
 from pathlib import Path
 from typing import Any
 
-# import yaml  # type: ignore
+import yaml  # type: ignore
 from sqlalchemy import Engine, create_engine, event
 from sqlalchemy.orm import Session, sessionmaker
 
@@ -16,7 +17,7 @@ from .models import Schema as SchemaTable
 __all__ = ["SchemaManager"]
 
 
-DEFAULT_SCHEMA = Path(__file__).parent / "default_schema.yml"
+BASE_SCHEMA = Path(__file__).parent / "meta_schemas" / "frictionlessv2.json"
 
 
 @event.listens_for(Engine, "connect")  # type: ignore
@@ -35,6 +36,21 @@ def set_sqlite_pragma(dbapi_connection: Any, connection_record: Any) -> None:
 
 
 __all__ = ["SchemaManager"]
+
+
+def read_json_or_yaml(file: str | Path) -> dict:
+    """Read a file in either json or yaml format
+
+    Args:
+        file (str | Path): File path
+
+    Returns:
+        dict: File contents
+    """
+    with open(file) as f:
+        if file.suffix == ".json":
+            return json.load(f)
+        return yaml.safe_load(f)
 
 
 class SchemaManager:
@@ -70,7 +86,6 @@ class SchemaManager:
     def __init__(
         self,
         fn_db: str | None = None,
-        meta_schema: str | Path | None = None,
     ) -> None:
         """Initialize the database engine and session factory
         Args:
@@ -81,7 +96,9 @@ class SchemaManager:
                 provided it is assumed to be a path to a schema file in yaml format.
         """
         # create the meta-data schema
-        # meta_schema = meta_schema or DEFAULT_SCHEMA
+        # TODO allow for extensions of the base schema
+        self._meta_schema = BASE_SCHEMA
+
         # self._meta_schema = self._create_schema_from_file(meta_schema)
         # create the engine and the tables
         conn_str = f"sqlite:///{fn_db}" if fn_db else "sqlite:///:memory:"
