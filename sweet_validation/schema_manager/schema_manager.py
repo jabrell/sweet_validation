@@ -1,15 +1,14 @@
 from __future__ import annotations
 
-import json
 from collections.abc import Generator
 from contextlib import contextmanager
 from pathlib import Path
 from typing import Any
 
-import yaml  # type: ignore
 from sqlalchemy import Engine, create_engine, event
 from sqlalchemy.orm import Session, sessionmaker
 
+from ..utils import read_json_or_yaml
 from .models import Base
 from .models import Data as DataTable
 from .models import Schema as SchemaTable
@@ -36,22 +35,6 @@ def set_sqlite_pragma(dbapi_connection: Any, connection_record: Any) -> None:
 
 
 __all__ = ["SchemaManager"]
-
-
-def read_json_or_yaml(file: str | Path) -> Any:
-    """Read a file in either json or yaml format
-
-    Args:
-        file (str | Path): File path
-
-    Returns:
-        dict: File contents
-    """
-    file = Path(file)
-    with open(file) as f:
-        if file.suffix == ".json":
-            return json.load(f)
-        return yaml.safe_load(f)
 
 
 class SchemaManager:
@@ -98,7 +81,7 @@ class SchemaManager:
         """
         # create the meta-data schema
         # TODO allow for extensions of the base schema
-        self._meta_schema = BASE_SCHEMA
+        self._meta_schema: dict[str, Any] = read_json_or_yaml(BASE_SCHEMA)
 
         # self._meta_schema = self._create_schema_from_file(meta_schema)
         # create the engine and the tables
