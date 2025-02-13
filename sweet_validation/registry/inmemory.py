@@ -1,5 +1,6 @@
 from typing import Any
 
+from ..exceptions import DataValidationError
 from ..schema_manager import SchemaManager
 from ..storage import InMemoryStorage
 
@@ -58,7 +59,7 @@ class InMemoryRegistry:
             key (str): Key of schema to delete
 
         Raises:
-            IntegrityError: If the schema does not exist or data associated with
+            ValueError: If the schema does not exist or data associated with
                 the schema still exist
         """
         self._schema_manager.delete_schema(key=key)
@@ -72,6 +73,7 @@ class InMemoryRegistry:
 
         Raises:
             KeyError: If the schema does not exist
+            DataValidationError: If the data does not conform to the schema
         """
         # ensure that new schema is valid
         self._schema_manager.validate_schema(schema)
@@ -174,11 +176,11 @@ class InMemoryRegistry:
             schema (dict[str, Any]): Schema to validate against
 
         Raises:
-            ValueError: If data does not conform to schema
+            DataValidationError: If data does not conform to schema
         """
         # check data against schema
         if not self._validator.is_valid(data, schema):
-            raise ValueError("Data does not conform to schema")
+            raise DataValidationError("Data does not conform to schema")
 
     @property
     def data(self) -> list[str]:
