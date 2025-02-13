@@ -1,9 +1,10 @@
 from __future__ import annotations
 
+import json
 from collections.abc import Generator
 from contextlib import contextmanager
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 import jsonschema
 from sqlalchemy import Engine, create_engine, event
@@ -93,21 +94,23 @@ class SchemaManager:
         conn_str = f"sqlite:///{fn_db}" if fn_db else "sqlite:///:memory:"
         self._init_db(conn_str)
 
-    def _create_schema_from_file(self, schema: str) -> str:
+    def _create_and_check_schema(
+        self, schema: str | Path | dict[str, Any]
+    ) -> dict[str, Any]:
         """Create a schema from file and return the scheme itself it is already a
         schema
 
         Args:
-            schema (str | Schema): Schema or path to schema file
+            schema (str | Path | dict[str, Any]): Schema
+                If a string or pathlib.Path is provided, it is assumed to be the
+                path to a schema file in json or yaml format
 
         Returns:
-            Schema: Schema
+            dict[str, Any]: Schema
         """
-        # TODO should only have schema checking here
-        # if isinstance(schema, str | Path):
-        #     with open(schema) as f:
-        #         schema = yaml.safe_load(f)
-        #     schema = Schema(schema)
+        if isinstance(schema, str | Path):
+            schema = read_json_or_yaml(schema)
+        self.validate_schema(schema)
         return schema
 
     # --------- schema management methods
@@ -121,8 +124,7 @@ class SchemaManager:
         with self.get_session() as session:
             return [schema.id for schema in session.query(SchemaTable).all()]
 
-    # todo fix output type here
-    def __getitem__(self, key: str) -> str:
+    def __getitem__(self, key: str) -> dict[str, Any]:
         """Get the schema given the key
 
         Args:
@@ -138,22 +140,27 @@ class SchemaManager:
             schema = session.query(SchemaTable).filter(SchemaTable.id == key).first()
             if not schema:
                 raise KeyError(f"Schema key '{key}' not found")
-            return str(schema.schema)
+            return cast(dict[str, Any], json.loads(schema.schema))
 
-    def add_schema(self, key: str, schema: str) -> None:
+    def add_schema(self, key: str, schema: str | Path | dict[str, Any]) -> None:
         """Insert a schema into the database given the key
 
         Args:
             key (str): Schema key
+            schema (str | Path | dict[str, Any]): Schema
+                If a string or pathlib.Path is provided, it is assumed to be the
+                path to a schema file in json or yaml format.
 
         Raises:
             KeyError: If the schema key already exists
         """
         if key in self.schemas:
             raise KeyError(f"Schema key '{key}' already exists")
-        # self.validate_schema(schema)
-        # schema = self._create_schema_from_file(schema)
 
+        schema = self._create_and_check_schema(schema)
+
+        # convert schema to json string and store in database
+        schema = json.dumps(schema)
         with self.get_session() as session:
             session.add(SchemaTable(id=key, schema=schema))
             session.commit()
@@ -176,7 +183,7 @@ class SchemaManager:
             session.query(SchemaTable).filter(SchemaTable.id == key).delete()
             session.commit()
 
-    def replace_schema(self, key: str, schema: str) -> None:
+    def replace_schema(self, key: str, schema: str | Path | dict[str, Any]) -> None:
         """Replace a schema in the database
 
         Args:
@@ -188,7 +195,10 @@ class SchemaManager:
         """
         if key not in self.schemas:
             raise KeyError(f"Schema key '{key}' not found")
-        # self.validate_schema(schema)
+
+        schema = self._create_and_check_schema(schema)
+
+        schema = json.dumps(schema)
         with self.get_session() as session:
             session.query(SchemaTable).filter(SchemaTable.id == key).update(
                 {"schema": schema}
@@ -278,7 +288,7 @@ class SchemaManager:
             session.commit()
 
     # todo fix output type here
-    def get_data_schema(self, key: str) -> str:
+    def get_data_schema(self, key: str) -> dict[str, Any]:
         """Get the schema key associated with the data key
 
         Args:

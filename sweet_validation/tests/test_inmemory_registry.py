@@ -2,15 +2,17 @@ import pytest
 
 from sweet_validation.registry import InMemoryRegistry
 
+from .schemas import valid_schema, valid_schema2
+
 
 def test_add_schema():
     registry = InMemoryRegistry()
-    registry.add_schema("key", "schema")
+    registry.add_schema("key", valid_schema)
     assert registry.schemas == ["key"]
-    assert registry.get_schema("key") == "schema"
+    assert registry.get_schema("key") == valid_schema
     # already exists so KeyError is raised
     with pytest.raises(KeyError):
-        registry.add_schema("key", "schema")
+        registry.add_schema("key", valid_schema)
 
 
 def test_add_data():
@@ -19,7 +21,7 @@ def test_add_data():
     with pytest.raises(KeyError):
         registry.add_data("dkey", "lkey", data="data")
 
-    registry.add_schema("skey", "schema")
+    registry.add_schema("skey", valid_schema)
     registry.add_data("dkey", "skey", data="data")
     assert registry.list_data() == [("dkey", "skey")]
     assert registry.get_data("dkey") == "data"
@@ -38,7 +40,7 @@ def test_delete_schema():
         registry.delete_schema("key")
 
     # raise ValueError if data associated with schema still exist
-    registry.add_schema("skey", "schema")
+    registry.add_schema("skey", valid_schema)
     registry.add_data("dkey", "skey", data="data")
     with pytest.raises(ValueError):
         registry.delete_schema("skey")
@@ -55,7 +57,7 @@ def test_delete_data():
     with pytest.raises(KeyError):
         registry.delete_data("key")
 
-    registry.add_schema("skey", "schema")
+    registry.add_schema("skey", valid_schema)
     registry.add_data("dkey", "skey", data="data")
     registry.delete_data("dkey")
     assert registry.data == []
@@ -65,11 +67,11 @@ def test_replace_schema():
     registry = InMemoryRegistry()
     # raise IntegrityError if schema does not exist
     with pytest.raises(KeyError):
-        registry.replace_schema("key", "schema")
-    registry.add_schema("skey", "schema")
+        registry.replace_schema("key", valid_schema)
+    registry.add_schema("skey", valid_schema)
     registry.add_data("dkey", "skey", data="data")
-    registry.replace_schema("skey", "new_schema")
-    assert registry.get_schema("skey") == "new_schema"
+    registry.replace_schema("skey", valid_schema2)
+    assert registry.get_schema("skey") == valid_schema2
 
 
 def test_replace_data():
@@ -78,7 +80,7 @@ def test_replace_data():
     with pytest.raises(KeyError):
         registry.replace_data("key", "data")
 
-    registry.add_schema("skey", "schema")
+    registry.add_schema("skey", valid_schema)
     registry.add_data("dkey", "skey", data="data")
     registry.replace_data("dkey", "new_data")
     assert registry.get_data("dkey") == "new_data"

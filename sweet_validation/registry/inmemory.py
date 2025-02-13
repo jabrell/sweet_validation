@@ -71,15 +71,11 @@ class InMemoryRegistry:
         Raises:
             KeyError: If the schema does not exist
         """
-        # TODO check schema against metadata standard
-        # --> Done by schema manager?
         # TODO check data against schema
         # --> where is this done?
-
         for data_key in self.schema_manager.list_data_for_schema(key):
             data = self.get_data(data_key)
             logging.info(f"Data: {data} Schema: {schema}")
-        # TODO how to log schema changes. The old schema is not available after
         # replacement
         self.schema_manager.replace_schema(key, schema)
 
