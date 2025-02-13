@@ -38,7 +38,7 @@ def set_sqlite_pragma(dbapi_connection: Any, connection_record: Any) -> None:
 __all__ = ["SchemaManager"]
 
 
-def read_json_or_yaml(file: str | Path) -> dict:
+def read_json_or_yaml(file: str | Path) -> dict[str, str]:
     """Read a file in either json or yaml format
 
     Args:
