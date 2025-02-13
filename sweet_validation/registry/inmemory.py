@@ -5,18 +5,20 @@ from ..storage import InMemoryStorage
 
 
 class InMemoryRegistry:
-    schema_manager: SchemaManager
+    _schema_manager: SchemaManager
     _data_store: InMemoryStorage
+    _validator: Any
 
-    def __init__(self, validator: Any, fn_schema_db: str | None = None) -> None:
+    def __init__(self, validator: Any, schema_manager: SchemaManager) -> None:
         """Initialize the registry with schema manager and storage
 
         Args:
+            validator (Any): Validator to validate data against schema
             fn_schema_db (str | None, optional): Filename of schema database.
                 Defaults to None.
         """
-        self.schema_manager = SchemaManager(fn_db=fn_schema_db)
-        self.validator = validator
+        self._schema_manager = schema_manager
+        self._validator = validator
         self._data_store = InMemoryStorage()
 
     # -------- schema related methods
@@ -33,7 +35,7 @@ class InMemoryRegistry:
         """
         # TODO check schema against metadata standard
         # --> Done by schema manager?
-        self.schema_manager.add_schema(key=key, schema=schema)
+        self._schema_manager.add_schema(key=key, schema=schema)
 
     def get_schema(self, key: str) -> Any:
         """Given the key of schema, return the schema
@@ -47,7 +49,7 @@ class InMemoryRegistry:
         Raises:
             KeyError: If the schema does not exist
         """
-        return self.schema_manager[key]
+        return self._schema_manager[key]
 
     def delete_schema(self, key: str) -> None:
         """Given the key of schema delete it
@@ -59,7 +61,7 @@ class InMemoryRegistry:
             IntegrityError: If the schema does not exist or data associated with
                 the schema still exist
         """
-        self.schema_manager.delete_schema(key=key)
+        self._schema_manager.delete_schema(key=key)
 
     def replace_schema(self, key: str, schema: Any) -> None:
         """Replace a schema in the registry
@@ -72,14 +74,12 @@ class InMemoryRegistry:
             KeyError: If the schema does not exist
         """
         # ensure that new schema is valid
-        self.schema_manager.validate_schema(schema)
-        # TODO check data against schema
-        # --> where is this done?
-        for data_key in self.schema_manager.list_data_for_schema(key):
+        self._schema_manager.validate_schema(schema)
+        for data_key in self._schema_manager.list_data_for_schema(key):
             data = self.get_data(data_key)
             self._validate_data(data=data, schema=schema)
         # replacement
-        self.schema_manager.replace_schema(key, schema)
+        self._schema_manager.replace_schema(key, schema)
 
     @property
     def schemas(self) -> list[str]:
@@ -88,7 +88,7 @@ class InMemoryRegistry:
         Returns:
             list[str]: List of schema keys
         """
-        return self.schema_manager.schemas
+        return self._schema_manager.schemas
 
     # -------- data related methods
     def add_data(self, key: str, schema_key: str, data: Any) -> None:
@@ -102,14 +102,14 @@ class InMemoryRegistry:
         Raises:
             KeyError: If the schema does not exist
         """
-        if key in self.schema_manager.data:
+        if key in self._schema_manager.data:
             raise KeyError(f"Data {key} already exists")
         if schema_key not in self.schemas:
             raise KeyError(f"Schema {schema_key} does not exist")
         # validate data
         self._validate_data(data=data, schema=self.get_schema(schema_key))
         # add data
-        self.schema_manager.add_data(key=key, key_schema=schema_key)
+        self._schema_manager.add_data(key=key, key_schema=schema_key)
         self._data_store.save(key, data)
 
     def get_data(self, key: str) -> Any:
@@ -135,7 +135,7 @@ class InMemoryRegistry:
         Raises:
             IntegrityError: If the data does not exist
         """
-        self.schema_manager.delete_data(key=key)
+        self._schema_manager.delete_data(key=key)
         self._data_store.delete(key)
 
     def replace_data(self, key: str, data: Any) -> None:
@@ -149,7 +149,7 @@ class InMemoryRegistry:
             KeyError: If the data does not exist
             ValidationError: If the data does not conform to the schema
         """
-        schema = self.schema_manager.get_data_schema(key)
+        schema = self._schema_manager.get_data_schema(key)
         # check data against schema
         self._validate_data(data=data, schema=schema)
         # replacement
@@ -164,7 +164,7 @@ class InMemoryRegistry:
         Raises:
             IntegrityError: If the data does not exist
         """
-        return self.schema_manager.list_data()
+        return self._schema_manager.list_data()
 
     def _validate_data(self, data: Any, schema: dict[str, Any]) -> None:
         """Validate data against schema
@@ -177,7 +177,7 @@ class InMemoryRegistry:
             ValueError: If data does not conform to schema
         """
         # check data against schema
-        if not self.validator.is_valid(data, schema):
+        if not self._validator.is_valid(data, schema):
             raise ValueError("Data does not conform to schema")
 
     @property
@@ -187,4 +187,4 @@ class InMemoryRegistry:
         Returns:
             list[str]: List of data keys
         """
-        return self.schema_manager.data
+        return self._schema_manager.data
