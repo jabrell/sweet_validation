@@ -7,7 +7,7 @@ from .schemas import valid_schema, valid_schema2
 
 
 def test_add_schema():
-    registry = InMemoryRegistry()
+    registry = InMemoryRegistry(validator=TweakedValidator())
     registry.add_schema("key", valid_schema)
     assert registry.schemas == ["key"]
     assert registry.get_schema("key") == valid_schema
