@@ -4,7 +4,7 @@ import json
 from collections.abc import Generator
 from contextlib import contextmanager
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 import jsonschema
 from sqlalchemy import Engine, create_engine, event
@@ -140,7 +140,7 @@ class SchemaManager:
             schema = session.query(SchemaTable).filter(SchemaTable.id == key).first()
             if not schema:
                 raise KeyError(f"Schema key '{key}' not found")
-            return json.loads(schema.schema)
+            return cast(dict[str, Any], json.loads(schema.schema))
 
     def add_schema(self, key: str, schema: str | Path | dict[str, Any]) -> None:
         """Insert a schema into the database given the key

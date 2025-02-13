@@ -1,6 +1,6 @@
 import json
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 import yaml  # type: ignore
 
@@ -21,11 +21,9 @@ def read_json_or_yaml(file: str | Path) -> dict[str, Any]:
     file = Path(file)
     with open(file) as f:
         if file.suffix == ".json":
-            # ignore types because json.load returns Any
-            return json.load(f)  # type: ignore
+            return cast(dict[str, Any], json.load(f))
         elif file.suffix in [".yaml", ".yml"]:
-            # ignore types because yaml.safe_load returns Any
-            return yaml.safe_load(f)  # type: ignore
+            return cast(dict[str, Any], yaml.safe_load(f))  # type: ignore
         else:
             raise ValueError(
                 f"File {file} is not json or yaml. Use .json, .yaml, or .yml"
