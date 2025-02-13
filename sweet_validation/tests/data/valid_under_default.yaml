@@ -1,0 +1,10 @@
+name: generation
+fields:
+  - name: name
+    type: string
+    constraints:
+      required: true
+  - name: value
+    type: number
+    constraints:
+      required: true

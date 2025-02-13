@@ -10,8 +10,10 @@ requires-python = ">=3.10"
 
 dependencies = [
     "frictionless>=5.18.0",
+    "jsonschema>=4.23.0",
     "numpy>=2.2.2",
     "pandas>=2.2.3",
+    "pyyaml>=6.0.2",
     "sqlalchemy>=2.0.38",
 ]
 
@@ -22,6 +24,7 @@ dev = [
     "pytest-cov>=6.0.0",
     "pytest>=8.3.4",
     "faker>=35.0.0",
+    "ipykernel>=6.29.5",
 ]
 docs = [
     "mkdocs-material>=9.6.2",
