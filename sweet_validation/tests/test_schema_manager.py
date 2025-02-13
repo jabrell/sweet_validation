@@ -54,7 +54,7 @@ def test_delete_schema(fn: str):
     assert relation_manager.schemas == []
     # raise exception due to foreign key constraint
     relation_manager.add_schema(key="test", schema=valid_schema)
-    relation_manager.insert_data(key="test", key_schema="test")
+    relation_manager.add_data(key="test", key_schema="test")
     with pytest.raises(ValueError):
         relation_manager.delete_schema(key="test")
     # raise if schema key does not exist
@@ -67,7 +67,7 @@ def test_delete_schema(fn: str):
 def test_get_data_schema(fn: str):
     relation_manager = SchemaManager(fn_db=fn)
     relation_manager.add_schema(key="s_test", schema=valid_schema)
-    relation_manager.insert_data(key="test", key_schema="s_test")
+    relation_manager.add_data(key="test", key_schema="s_test")
     assert relation_manager.get_data_schema(key="test") == valid_schema
     # raise KeyError if data key does not exist
     with pytest.raises(KeyError):
@@ -79,14 +79,14 @@ def test_get_data_schema(fn: str):
 def test_insert_data(fn: str):
     relation_manager = SchemaManager(fn_db=fn)
     relation_manager.add_schema(key="test", schema=valid_schema)
-    relation_manager.insert_data(key="test", key_schema="test")
+    relation_manager.add_data(key="test", key_schema="test")
     assert relation_manager.list_data() == [("test", "test")]
     # raise IntegrityError due to unique constraint of primary key
     with pytest.raises(KeyError):
-        relation_manager.insert_data("test", "test")
+        relation_manager.add_data("test", "test")
     # raise exception due to foreign key constraint
     with pytest.raises(KeyError):
-        relation_manager.insert_data("test2", "test2")
+        relation_manager.add_data("test2", "test2")
     relation_manager.clear_and_close()
 
 
@@ -94,7 +94,7 @@ def test_insert_data(fn: str):
 def test_delete_data(fn: str):
     relation_manager = SchemaManager(fn_db=fn)
     relation_manager.add_schema(key="test", schema=valid_schema)
-    relation_manager.insert_data(key="test", key_schema="test")
+    relation_manager.add_data(key="test", key_schema="test")
     assert relation_manager.list_data() == [("test", "test")]
     relation_manager.delete_data(key="test")
     assert relation_manager.list_data() == []
@@ -107,7 +107,7 @@ def test_delete_data(fn: str):
 def test_init_from_existing_db():
     relation_manager = SchemaManager(fn_db=db_file)
     relation_manager.add_schema(key="s_test", schema=valid_schema)
-    relation_manager.insert_data(key="test", key_schema="s_test")
+    relation_manager.add_data(key="test", key_schema="s_test")
     relation_manager.close()
     relation_manager2 = SchemaManager(fn_db=db_file)
     assert relation_manager2.get_data_schema(key="test") == valid_schema

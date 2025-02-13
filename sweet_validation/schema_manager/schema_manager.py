@@ -5,6 +5,7 @@ from contextlib import contextmanager
 from pathlib import Path
 from typing import Any
 
+import jsonschema
 from sqlalchemy import Engine, create_engine, event
 from sqlalchemy.orm import Session, sessionmaker
 
@@ -16,7 +17,7 @@ from .models import Schema as SchemaTable
 __all__ = ["SchemaManager"]
 
 
-BASE_SCHEMA = Path(__file__).parent / "meta_schemas" / "frictionlessv2.json"
+BASE_SCHEMA = Path(__file__).parent / "meta_schemas" / "frictionlessv1.json"
 
 
 @event.listens_for(Engine, "connect")  # type: ignore
@@ -42,19 +43,23 @@ class SchemaManager:
 
     The underlying database is in-memory if no filename is provided.
     If a filename is provided, the database is stored in the file.
-    The database has two tables: Schema and Data. Schema
+    The database has two tables: Schema and Data. The schema table stores the
+    schema key and the schema itself. The data table stores the data key and the
+    schema key associated with the data. Note that data table does not store data
+    but only the key to access the data.
 
     Attributes:
         schemas: List of schema keys
 
     Methods:
         # schema management methods
-        insert_schema: Insert a schema into the database
+        add_schema: Insert a schema into the database
         delete_schema: Delete a schema given the key
+        replace_schema: Replace a schema in the database
         list_data_for_schema: Get the data keys associated with the schema key
 
         # data management methods
-        insert_data: Insert data into the database
+        add_data: Insert data into the database
         list_data: Fetch all data keys
         delete_data: Delete data given the key
         get_data_schema: Get the schema key associated with the data key
@@ -146,7 +151,7 @@ class SchemaManager:
         """
         if key in self.schemas:
             raise KeyError(f"Schema key '{key}' already exists")
-        # TODO add schema validation
+        # self.validate_schema(schema)
         # schema = self._create_schema_from_file(schema)
 
         with self.get_session() as session:
@@ -183,7 +188,7 @@ class SchemaManager:
         """
         if key not in self.schemas:
             raise KeyError(f"Schema key '{key}' not found")
-        # TODO add schema validation
+        # self.validate_schema(schema)
         with self.get_session() as session:
             session.query(SchemaTable).filter(SchemaTable.id == key).update(
                 {"schema": schema}
@@ -203,6 +208,21 @@ class SchemaManager:
             data = session.query(DataTable).filter(DataTable.id_schema == key).all()
             return [str(d.id) for d in data]
 
+    def validate_schema(self, schema: str | Path | dict[str, Any]) -> None:
+        """Check if a schema is valid given the metadata schema
+
+        Args:
+            schema (str | Path | dict[str, Any]): Schema to check
+                If a string or pathlib.Path is provided, it is assumed to be the
+                path to a schema file in json or yaml format.
+
+        Raises:
+            jsonschema.exceptions.ValidationError: If the schema is not valid
+        """
+        if isinstance(schema, str | Path):
+            schema = read_json_or_yaml(schema)
+        jsonschema.validate(instance=schema, schema=self._meta_schema)
+
     # --------- data management methods
     @property
     def data(self) -> list[str]:
@@ -213,7 +233,7 @@ class SchemaManager:
         """
         return [d[0] for d in self.list_data()]
 
-    def insert_data(self, key: str, key_schema: str) -> None:
+    def add_data(self, key: str, key_schema: str) -> None:
         """Insert data into the database given the key and key of associated schema
 
         Args:

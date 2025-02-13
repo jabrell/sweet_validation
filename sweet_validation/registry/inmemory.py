@@ -113,7 +113,7 @@ class InMemoryRegistry:
         # TODO check data against schema
         # --> is that done here or by schema manager
         logging.info(f"Data: {data} Schema: {schema}")
-        self.schema_manager.insert_data(key=key, key_schema=schema_key)
+        self.schema_manager.add_data(key=key, key_schema=schema_key)
         self._data_store.save(key, data)
 
     def get_data(self, key: str) -> Any:
