@@ -298,15 +298,6 @@
   
 </li>
       
-        <li class="md-nav__item">
-  <a href="#meta-data-restrictions" class="md-nav__link">
-    <span class="md-ellipsis">
-      Meta-data restrictions
-    </span>
-  </a>
-  
-</li>
-      
     </ul>
   
 </nav>
@@ -354,15 +345,6 @@
   <a href="#table-schema" class="md-nav__link">
     <span class="md-ellipsis">
       Table Schema
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#meta-data-restrictions" class="md-nav__link">
-    <span class="md-ellipsis">
-      Meta-data restrictions
     </span>
   </a>
   
@@ -447,11 +429,14 @@ Fields can be narrowed down using <a href="https://specs.frictionlessdata.io/tab
 - maximum/minimum: Maximum/minimum for numerical values
 - pattern: Restrict strings by regular expressions
 - enum: Define a list of valid values for a string</p>
-<h2 id="meta-data-restrictions">Meta-data restrictions</h2>
-<p>The table schema describes a table and its columns. While that is sufficient to
+<!-- ## Meta-data restrictions
+
+The table schema describes a table and its columns. While that is sufficient to
 describe data, it does not allow to standardize the description of the tables, i.e.,
 the meta-data. To allow for the standardization of meta-data we use table schema
-that describes the meta-data:</p>
+that describes the meta-data:
+
+
 <pre><code class="language-yaml">name: metadata_schema
 description: |
   Description of the metadata standard. The metadata section of all resource
@@ -475,12 +460,14 @@ fields:
     items:
       type: string
 </code></pre>
-<p>The schema above describes the meta-data of table resources and defines an additional
-field <em>tags</em> to be used to make the data searchable. The field is not required, so the
+
+
+The schema above describes the meta-data of table resources and defines an additional
+field *tags* to be used to make the data searchable. The field is not required, so the
 generation schema above would comply with the standard. Version 1 of Frictionless,
 does not allow to restrict the table to match exactly the fields stated, i.e., it is
 possible to add additional fields. This is why the generation schema complies although
-it adds the field <em>title</em> to the meta-data.</p>
+it adds the field *title* to the meta-data. -->
 
 
 

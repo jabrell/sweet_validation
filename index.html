@@ -62,7 +62,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#welcome-to-mkdocs" class="md-skip">
+        <a href="#welcome-to-sweet-validation" class="md-skip">
           Skip to content
         </a>
       
@@ -291,8 +291,39 @@
 
 
 
-<h1 id="welcome-to-mkdocs">Welcome to MkDocs</h1>
-<p>For full documentation visit <a href="https://www.mkdocs.org">mkdocs.org</a>.</p>
+<h1 id="welcome-to-sweet-validation">Welcome to Sweet Validation</h1>
+<p><em>Sweet Validation</em> is package to perform data validation within the <a href="https://www.sweet-cosi.ch/">Sweet CoSi</a> project. To perform validation, the package relies on a description
+of data tables using yaml or json files. Data items are checked against the description
+provided in these files.</p>
+<p>To harmonize the description of data, <em>Sweet Validation</em> allows to set a standard
+for the data description, i.e., imposing a meta-data standard. By default this
+standard is set to the <a href="https://specs.frictionlessdata.io//table-schema/">Frictionless Table Scheme</a>. It is, however, possible to impose any standard as long as it is
+a valid <a href="https://json-schema.org/">json schema</a>.</p>
+<p>To validate data, we rely on a Validator class (<span style="color:red">ADD LINK TO API DOCS</span>) that mainly provides two methods:</p>
+<ol>
+<li>validate(data, schema): Takes a data item and a schema. Validating the data against
+the schema, it provides a validation report.</li>
+<li>is_valid(data, schema): Uses the validate method to return an indicator whether
+the data item is valid or not.</li>
+</ol>
+<p>The default Validator uses frictionless table schemas to validate <a href="https://pandas.pydata.org/docs/index.html">pandas dataframes</a>
+against the schema using the <a href="https://pandera.readthedocs.io/en/stable/">pandera</a> package.</p>
+<p>Validators check data against schemas. They however do not maintain the relation
+between data and schema, i.e., which schema is bound to which data item. The
+SchemaManager (<span style="color:red">ADD LINK TO API DOCS</span>) has two major
+tasks:</p>
+<ol>
+<li>Managing the relation between data items and schema</li>
+<li>Ensuring that all schemas comply with the meta-data standard.</li>
+</ol>
+<p>The Registry (<span style="color:red">ADD LINK TO API DOCS</span>) combines the
+SchemaManager and Validator together with a Storage interface that is responsible
+to save the data:</p>
+<p><img alt="Registry image" src="figures/sweet_registry.svg" /></p>
+<p>By interacting with schemas and data through the registry, it ensures that no data
+exists without a schema. Furthermore, it ensure that every change in data is checked
+against the associated schema. Likewise, every schema update triggers a validation
+check for all associated data resources.</p>
 
 
 
