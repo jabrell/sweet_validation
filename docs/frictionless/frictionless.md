@@ -70,7 +70,7 @@ Fields can be narrowed down using [constraints](https://specs.frictionlessdata.i
 - pattern: Restrict strings by regular expressions
 - enum: Define a list of valid values for a string
 
-## Meta-data restrictions
+<!-- ## Meta-data restrictions
 
 The table schema describes a table and its columns. While that is sufficient to
 describe data, it does not allow to standardize the description of the tables, i.e.,
@@ -107,4 +107,4 @@ field *tags* to be used to make the data searchable. The field is not required, 
 generation schema above would comply with the standard. Version 1 of Frictionless,
 does not allow to restrict the table to match exactly the fields stated, i.e., it is
 possible to add additional fields. This is why the generation schema complies although
-it adds the field *title* to the meta-data.
+it adds the field *title* to the meta-data. -->
