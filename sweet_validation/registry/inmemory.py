@@ -1,6 +1,7 @@
 from typing import Any
 
 from ..exceptions import DataValidationError
+from ..protocols import ValidatorProtocol
 from ..schema_manager import SchemaManager
 from ..storage import InMemoryStorage
 
@@ -8,9 +9,11 @@ from ..storage import InMemoryStorage
 class InMemoryRegistry:
     _schema_manager: SchemaManager
     _data_store: InMemoryStorage
-    _validator: Any
+    _validator: ValidatorProtocol
 
-    def __init__(self, validator: Any, schema_manager: SchemaManager) -> None:
+    def __init__(
+        self, validator: ValidatorProtocol, schema_manager: SchemaManager
+    ) -> None:
         """Initialize the registry with schema manager and storage
 
         Args:
