@@ -25,9 +25,9 @@ class DefaultValidator:
             ValidationError: If the data does not conform to the schema
         """
         # convert schema to pandera schema
-        schema = from_frictionless_schema(schema)
+        pa_schema = from_frictionless_schema(schema)
         try:
-            schema.validate(data, lazy=True)
+            pa_schema.validate(data, lazy=True)
             return ValidationReport(valid=True, errors={})
         except SchemaErrors as e:
             return ValidationReport(valid=False, errors=e.message)
