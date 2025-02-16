@@ -1,5 +1,7 @@
 from typing import Any
 
+from .validation_report import ValidationReport
+
 __all__ = ["DummyValidator"]
 
 
@@ -21,10 +23,9 @@ class DummyValidator:
         """
         self.response = response
 
-    # TODO how to we implement validation reports?
     def validate(
         self, data: Any, schema: dict[str, Any], response: bool | None = None
-    ) -> dict[str, Any]:
+    ) -> ValidationReport:
         """Validate the data against the schema
 
         Args:
@@ -33,10 +34,10 @@ class DummyValidator:
             response (bool, optional): Expected response. Defaults to True.
 
         Returns:
-            dict[str, Any]: Validation report
+            ValidationReport: Validation report
         """
         response = response if response is not None else self.response
-        return {"valid": response}
+        return ValidationReport(valid=response, errors={})
 
     def is_valid(
         self, data: Any, schema: dict[str, Any], response: bool | None = None
@@ -52,7 +53,4 @@ class DummyValidator:
         Returns:
             bool: True if valid else False
         """
-        response = response if response is not None else self.response
-        if self.validate(data, schema, response=response)["valid"]:
-            return True
-        return False
+        return self.validate(data, schema, response=response).valid

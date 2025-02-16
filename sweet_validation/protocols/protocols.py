@@ -2,6 +2,7 @@ from typing import Any, Protocol, runtime_checkable
 
 __all__ = [
     "StorageProtocol",
+    "ValidatorProtocol",
 ]
 
 
@@ -27,3 +28,20 @@ class StorageProtocol(Protocol):
     def exists(self, key: Any, **kwargs: Any) -> bool: ...
     def list(self) -> list[Any]: ...
     def replace(self, key: Any, value: Any, **kwargs: Any) -> Any: ...
+
+
+@runtime_checkable
+class ValidatorProtocol(Protocol):
+    """Protocol for validators
+
+    Validators implement at the very least the following methods:
+
+    Methods:
+        validate: Validate a data item against a schema and return a validation
+            report
+        is_valid: Validate a data item against a schema and return a boolean
+            indicating if the data is valid
+    """
+
+    def validate(self, data: Any, schema: Any, **kwargs: Any) -> Any: ...
+    def is_valid(self, data: Any, schema: Any, **kwargs: Any) -> bool: ...
