@@ -12,6 +12,7 @@ dependencies = [
     "jsonschema>=4.23.0",
     "numpy>=2.2.2",
     "pandas>=2.2.3",
+    "pandera[io]>=0.22.1",
     "pyyaml>=6.0.2",
     "sqlalchemy>=2.0.38",
 ]
@@ -22,8 +23,8 @@ dev = [
     "pre-commit>=4.1.0",
     "pytest-cov>=6.0.0",
     "pytest>=8.3.4",
-    "faker>=35.0.0",
     "ipykernel>=6.29.5",
+    "pandera[io,mypy]>=0.22.1",
 ]
 docs = [
     "mkdocs-material>=9.6.2",
