@@ -25,4 +25,3 @@ class ValidationReport:
         if self.valid == value.valid and self.errors == value.errors:
             return True
         return False
-        return self.valid == value.valid and self.errors == value.errors

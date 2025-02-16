@@ -23,6 +23,16 @@ FRICTIONLESS_SCHEMA = {
 }
 
 
+def test_validation_report():
+    report = ValidationReport(valid=True, errors={})
+    assert report.valid
+    assert not report.errors
+    assert report == ValidationReport(valid=True, errors={})
+    assert report != ValidationReport(valid=False, errors={})
+    assert report != ValidationReport(valid=True, errors={"a": "b"})
+    assert report != []
+
+
 def test_dummy_validator():
     validator = DummyValidator()
     assert validator.validate("data", {}) == ValidationReport(valid=True, errors={})
