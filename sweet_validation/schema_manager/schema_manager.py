@@ -10,7 +10,7 @@ import jsonschema
 from sqlalchemy import Engine, create_engine, event
 from sqlalchemy.orm import Session, sessionmaker
 
-from ..utils import read_json_or_yaml
+from ..utils import read_schema_from_file
 from .models import Base
 from .models import Data as DataTable
 from .models import Schema as SchemaTable
@@ -87,7 +87,7 @@ class SchemaManager:
         """
         # create the meta-data schema
         # TODO allow for extensions of the base schema
-        self._meta_schema: dict[str, Any] = read_json_or_yaml(BASE_SCHEMA)
+        self._meta_schema: dict[str, Any] = read_schema_from_file(BASE_SCHEMA)
 
         # self._meta_schema = self._create_schema_from_file(meta_schema)
         # create the engine and the tables
@@ -108,8 +108,7 @@ class SchemaManager:
         Returns:
             dict[str, Any]: Schema
         """
-        if isinstance(schema, str | Path):
-            schema = read_json_or_yaml(schema)
+        schema = read_schema_from_file(schema)
         self.validate_schema(schema)
         return schema
 
@@ -230,7 +229,7 @@ class SchemaManager:
             jsonschema.exceptions.ValidationError: If the schema is not valid
         """
         if isinstance(schema, str | Path):
-            schema = read_json_or_yaml(schema)
+            schema = read_schema_from_file(schema)
         jsonschema.validate(instance=schema, schema=self._meta_schema)
 
     # --------- data management methods

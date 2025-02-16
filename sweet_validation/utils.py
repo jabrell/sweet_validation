@@ -5,7 +5,7 @@ from typing import Any, cast
 import yaml  # type: ignore
 
 
-def read_json_or_yaml(file: str | Path) -> dict[str, Any]:
+def read_schema_from_file(file: str | Path | dict[str, Any]) -> dict[str, Any]:
     """Read a file in either json or yaml format
 
     Args:
@@ -18,6 +18,8 @@ def read_json_or_yaml(file: str | Path) -> dict[str, Any]:
         ValueError: If file is not json or yaml (.json, .yaml, .yml)
         FileNotFoundError: If file is not found
     """
+    if isinstance(file, dict):
+        return file
     file = Path(file)
     with open(file) as f:
         if file.suffix == ".json":
