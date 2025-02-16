@@ -15,7 +15,7 @@ class DefaultValidator:
     """
 
     @staticmethod
-    def validate(data: pd.DataFrame, schema: dict[str | Any]) -> ValidationReport:
+    def validate(data: pd.DataFrame, schema: dict[str, Any]) -> ValidationReport:
         """Validate a pandas dataframe against a frictionless schema
 
         Args:
@@ -33,7 +33,7 @@ class DefaultValidator:
             return ValidationReport(valid=False, errors=e.message)
 
     @staticmethod
-    def is_valid(data: pd.DataFrame, schema: dict[str | Any]) -> bool:
+    def is_valid(data: pd.DataFrame, schema: dict[str, Any]) -> bool:
         """Check if a pandas dataframe is valid against a frictionless schema
 
         Args:
