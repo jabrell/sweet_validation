@@ -34,8 +34,6 @@ class InMemoryRegistry:
         Raises:
             KeyError: If the schema already exists
         """
-        # TODO check schema against metadata standard
-        # --> Done by schema manager?
         self._schema_manager.add_schema(key=key, schema=schema)
 
     def get_schema(self, key: str) -> Any:
