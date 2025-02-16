@@ -20,6 +20,8 @@ class ValidationReport:
         self.errors = errors
 
     def __eq__(self, value: object) -> bool:
+        if not isinstance(value, ValidationReport):
+            return False
         if self.valid == value.valid and self.errors == value.errors:
             return True
         return False
