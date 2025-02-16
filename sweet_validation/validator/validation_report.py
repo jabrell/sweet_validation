@@ -12,9 +12,12 @@ class ValidationReport:
     - `errors` - a list of validation errors
     """
 
-    def __init__(self, valid: bool, errors: dict[Any, Any]):
+    valid: bool
+    errors: dict[Any, Any]
+
+    def __init__(self, valid: bool, errors: dict[Any, Any]) -> None:
         self.valid = valid
         self.errors = errors
 
-    def __eq__(self, value):
+    def __eq__(self, value: "ValidationReport") -> bool:
         return self.valid == value.valid and self.errors == value.errors
