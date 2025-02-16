@@ -4,7 +4,7 @@ from pathlib import Path
 import pytest
 import yaml
 
-from sweet_validation.utils import read_json_or_yaml
+from sweet_validation.utils import read_schema_from_file
 
 
 def test_read_json():
@@ -12,7 +12,7 @@ def test_read_json():
     fn = Path("tmp.json")
     with open(fn, "w") as f:
         json.dump(content, f)
-    assert read_json_or_yaml(fn) == content
+    assert read_schema_from_file(fn) == content
     Path(fn).unlink()
 
 
@@ -22,7 +22,7 @@ def test_read_yaml(ext: str):
     fn = Path(f"tmp.{ext}")
     with open(fn, "w") as f:
         yaml.dump(content, f)
-    assert read_json_or_yaml(fn) == content
+    assert read_schema_from_file(fn) == content
     fn.unlink()
 
 
@@ -31,8 +31,8 @@ def test_read_invalid():
     with open(fn, "w") as f:
         f.write("invalid")
     with pytest.raises(ValueError):
-        read_json_or_yaml(fn)
+        read_schema_from_file(fn)
     fn.unlink()
     # file not found
     with pytest.raises(FileNotFoundError):
-        read_json_or_yaml(fn)
+        read_schema_from_file(fn)

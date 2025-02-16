@@ -10,7 +10,7 @@ import jsonschema
 from sqlalchemy import Engine, create_engine, event
 from sqlalchemy.orm import Session, sessionmaker
 
-from ..utils import read_json_or_yaml
+from ..utils import read_schema_from_file
 from .models import Base
 from .models import Data as DataTable
 from .models import Schema as SchemaTable
@@ -73,9 +73,12 @@ class SchemaManager:
         clear_and_close: Clear all data and close the database engine
     """
 
+    key_meta_schema = "__meta_schema__"
+
     def __init__(
         self,
         fn_db: str | None = None,
+        meta_schema: str | Path | dict[str, Any] | None = None,
     ) -> None:
         """Initialize the database engine and session factory
         Args:
@@ -87,12 +90,19 @@ class SchemaManager:
         """
         # create the meta-data schema
         # TODO allow for extensions of the base schema
-        self._meta_schema: dict[str, Any] = read_json_or_yaml(BASE_SCHEMA)
+        meta_schema = meta_schema or BASE_SCHEMA
+        self._meta_schema: dict[str, Any] = read_schema_from_file(meta_schema)
 
         # self._meta_schema = self._create_schema_from_file(meta_schema)
         # create the engine and the tables
         conn_str = f"sqlite:///{fn_db}" if fn_db else "sqlite:///:memory:"
         self._init_db(conn_str)
+
+        # check whether the meta-schema is in the database else create it
+        try:
+            self._meta_schema = self[self.key_meta_schema]
+        except KeyError:
+            self._write_schema_to_db(self.key_meta_schema, self._meta_schema)
 
     def _create_and_check_schema(
         self, schema: str | Path | dict[str, Any]
@@ -108,8 +118,7 @@ class SchemaManager:
         Returns:
             dict[str, Any]: Schema
         """
-        if isinstance(schema, str | Path):
-            schema = read_json_or_yaml(schema)
+        schema = read_schema_from_file(schema)
         self.validate_schema(schema)
         return schema
 
@@ -122,7 +131,11 @@ class SchemaManager:
             list[str]: List of schema keys
         """
         with self.get_session() as session:
-            return [schema.id for schema in session.query(SchemaTable).all()]
+            return [
+                schema.id
+                for schema in session.query(SchemaTable).all()
+                if schema.id != self.key_meta_schema
+            ]
 
     def __getitem__(self, key: str) -> dict[str, Any]:
         """Get the schema given the key
@@ -160,10 +173,7 @@ class SchemaManager:
         schema = self._create_and_check_schema(schema)
 
         # convert schema to json string and store in database
-        schema = json.dumps(schema)
-        with self.get_session() as session:
-            session.add(SchemaTable(id=key, schema=schema))
-            session.commit()
+        self._write_schema_to_db(key, schema)
 
     def delete_schema(self, key: str) -> None:
         """Delete a schema given the key
@@ -230,8 +240,20 @@ class SchemaManager:
             jsonschema.exceptions.ValidationError: If the schema is not valid
         """
         if isinstance(schema, str | Path):
-            schema = read_json_or_yaml(schema)
+            schema = read_schema_from_file(schema)
         jsonschema.validate(instance=schema, schema=self._meta_schema)
+
+    def _write_schema_to_db(self, key: str, schema: dict[str, Any]) -> None:
+        """Write a schema to the database
+
+        Args:
+            key (str): Schema key
+            schema (dict[str, Any]): Schema
+        """
+        my_schema = json.dumps(schema)
+        with self.get_session() as session:
+            session.add(SchemaTable(id=key, schema=my_schema))
+            session.commit()
 
     # --------- data management methods
     @property
@@ -287,7 +309,6 @@ class SchemaManager:
             session.query(DataTable).filter(DataTable.id == key).delete()
             session.commit()
 
-    # todo fix output type here
     def get_data_schema(self, key: str) -> dict[str, Any]:
         """Get the schema key associated with the data key
 
