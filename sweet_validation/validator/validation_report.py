@@ -19,5 +19,5 @@ class ValidationReport:
         self.valid = valid
         self.errors = errors
 
-    def __eq__(self, value: "ValidationReport") -> bool:
+    def __eq__(self, value: object) -> bool:
         return self.valid == value.valid and self.errors == value.errors
