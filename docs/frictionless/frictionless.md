@@ -62,6 +62,7 @@ part that is mandatory. A *field* has to have a name and should have at least a
 type, i.e, whether you are storing strings, numbers, integer, ... (see description
 of [all possible types](https://framework.frictionlessdata.io/docs/fields/any.html)).
 Fields can be narrowed down using [constraints](https://specs.frictionlessdata.io/table-schema/#constraints):
+
 - required: Whether the field must be given
 - unique: Whether values in the field must be unique
 - minLength/maxLength: Allows to set the minimal and maximum value for collections

@@ -71,7 +71,36 @@ class SchemaManager:
         close: Close the database engine
         clear: Clear all tables in the database
         clear_and_close: Clear all data and close the database engine
-    """
+
+    Example:
+
+        .. code-block:: python
+        # create a schema manager based on the standard metadata schema
+        myManager = SchemaManager()
+
+        # add a schema
+        valid_schema = {
+            "fields": [
+                {"name": "id", "type": "integer"},
+                {"name": "name", "type": "string"},
+            ],
+            "name": "test",
+        }
+        myManager.add_schema("schema1", valid_schema)
+        # Likewise, if the schema is in a file, you can provide the path to the file
+        myManager.add_schema("schema2", "path/to/schema.yaml")
+
+        # the default schema is based on the frictionless table schema v1 with
+        # the extension that the schema must have a name field
+        # So the following schema is invalid
+        invalid_schema = {
+            "fields": [
+                {"name": "id", "type": "integer"},
+                {"name": "name", "type": "string"},
+            ],
+        }
+        myManager.add_schema("schema2", invalid_schema) # ==> raises jsonschema.exceptions.ValidationError
+    """  # noqa: E501
 
     key_meta_schema = "__meta_schema__"
 

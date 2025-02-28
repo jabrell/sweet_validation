@@ -2,11 +2,13 @@
 
 ## Protocols
 
-::: sweet_validation.storage.StorageProtocol
+::: sweet_validation.protocols.StorageProtocol
     options:
         members: True  # Show all members (including private ones)
         undoc-members: True # Show undocumented members
         show-inheritance: True # Show inheritance of classes
+
+::: sweet_validation.protocols.ValidatorProtocol
 
 ## Classes
 
@@ -28,7 +30,7 @@
 
 ### Validators
 
-::: sweet_validation.validator.tweaked_validator.TweakedValidator
+::: sweet_validation.validator.DummyValidator
     options:
         members: True  # Show all members (including private ones)
         undoc-members: True # Show undocumented members

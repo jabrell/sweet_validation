@@ -18,8 +18,6 @@ class InMemoryRegistry:
 
         Args:
             validator (Any): Validator to validate data against schema
-            fn_schema_db (str | None, optional): Filename of schema database.
-                Defaults to None.
         """
         self._schema_manager = schema_manager
         self._validator = validator

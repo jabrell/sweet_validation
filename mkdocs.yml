@@ -4,7 +4,7 @@ theme:
   name: material
 
 nav:
-  - Home: index.md
+  - Home: approach/index.md
   - API Reference: api/api.md
   - Introduction to Frictionless: frictionless/frictionless.md
 
