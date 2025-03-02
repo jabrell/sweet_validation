@@ -4,7 +4,29 @@
 of data tables using yaml or json files. Data items are checked against the description
 provided in these files.
 
-To harmonize the description of data, *Sweet Validation* allows to set a standard
+## Overview
+
+Our approach relies on a Registry that manages the schemas and its relations to data.
+
+![Registry image](sweet_registry.svg)
+
+The registry relies on three main components:
+
+- *SchemaManager* stores schemas that are used to validate data. The manager keeps track
+of the relation between schemas and data and also validates new schemas against the imposed
+meta-data standard.
+- *Validators* provide methods to validate data against a given schema.
+- *FileStorage* provides the methods to persist and retrieve data.
+
+Using validators, the registry coordinates the actions between the SchemaManager and
+the FileStorage ensuring that no data are saved or updated without validation.
+
+
+## Installation
+
+**tbd**
+
+<!-- To harmonize the description of data, *Sweet Validation* allows to set a standard
 for the data description, i.e., imposing a meta-data standard. By default this
 standard is set to the [Frictionless Table Scheme](https://specs.frictionlessdata.io//table-schema/). It is, however, possible to impose any standard as long as it is
 a valid [json schema](https://json-schema.org/).
@@ -32,10 +54,10 @@ The Registry (<span style="color:red">ADD LINK TO API DOCS</span>) combines the
 SchemaManager and Validator together with a Storage interface that is responsible
 to save the data:
 
-![Registry image](figures/sweet_registry.svg)
+[Registry image](figures/sweet_registry.svg)
 
 By interacting with schemas and data through the registry, it ensures that no data
 exists without a schema. Furthermore, it ensure that every change in data is checked
 against the associated schema. Likewise, every schema update triggers a validation
 check for all associated data resources.
-
+ -->
