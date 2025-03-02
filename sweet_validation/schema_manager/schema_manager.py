@@ -67,7 +67,6 @@ class SchemaManager:
 
         # db management methods
         get_session: Provides a context-managed database session
-        close_engine: Close the database engine
         close: Close the database engine
         clear: Clear all tables in the database
         clear_and_close: Clear all data and close the database engine
@@ -389,6 +388,7 @@ class SchemaManager:
         self._engine = None
 
     def close(self) -> None:
+        """Close the database engine."""
         self._close_engine()
 
     def clear(self) -> None:
@@ -399,6 +399,7 @@ class SchemaManager:
             session.commit()
 
     def clear_and_close(self) -> None:
+        """Clear all data in the database and close the engine"""
         self.clear()
         self.close()
 
