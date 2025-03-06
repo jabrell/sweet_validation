@@ -19,9 +19,7 @@ __all__ = ["SchemaManager"]
 
 
 BASE_SCHEMA = Path(__file__).parent / "meta_schemas" / "frictionlessv1.json"
-SWEET_EXTENSIONS: list[str | Path | dict[str, Any]] | None = [
-    Path(__file__).parent / "meta_schemas" / "sweet_metastandard.yaml"
-]
+SWEET_EXTENSIONS = [Path(__file__).parent / "meta_schemas" / "sweet_metastandard.yaml"]
 
 
 @event.listens_for(Engine, "connect")  # type: ignore
@@ -133,8 +131,9 @@ class SchemaManager:
         # create the meta-data schema
         metaschema_base = metaschema_base or BASE_SCHEMA
         if metaschema_extensions is None:
-            metaschema_extensions = SWEET_EXTENSIONS
-        schemas = [metaschema_base] + metaschema_extensions
+            schemas = [metaschema_base] + SWEET_EXTENSIONS
+        else:
+            schemas = [metaschema_base] + metaschema_extensions
         self._metaschema: dict[str, Any] = self._combine_metaschemas(schemas)
 
         # self._meta_schema = self._create_schema_from_file(meta_schema)
