@@ -150,7 +150,7 @@ class SchemaManager:
     @staticmethod
     def _combine_metaschemas(
         schemas: list[str | Path | dict[str, Any]],
-    ) -> list[dict[str, Any]]:
+    ) -> dict[str, Any]:
         """Combine a list of json schemas to a single schema
 
         Args:
