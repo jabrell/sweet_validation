@@ -1,5 +1,5 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema#",
+  "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "Table Schema",
   "description": "A Table Schema for this resource, compliant with the [Table Schema](/tableschema/) specification.",
   "required": ["fields"],
@@ -20,8 +20,7 @@
               "name": {
                 "title": "Name",
                 "description": "A name for this field.",
-                "type": "string",
-                "pattern": "^[a-z_]+$"
+                "type": "string"
               },
               "title": {
                 "title": "Title",
@@ -113,8 +112,7 @@
               "name": {
                 "title": "Name",
                 "description": "A name for this field.",
-                "type": "string",
-                "pattern": "^[a-z_]+$"
+                "type": "string"
               },
               "title": {
                 "title": "Title",
@@ -237,8 +235,7 @@
               "name": {
                 "title": "Name",
                 "description": "A name for this field.",
-                "type": "string",
-                "pattern": "^[a-z_]+$"
+                "type": "string"
               },
               "title": {
                 "title": "Title",
@@ -351,8 +348,7 @@
               "name": {
                 "title": "Name",
                 "description": "A name for this field.",
-                "type": "string",
-                "pattern": "^[a-z_]+$"
+                "type": "string"
               },
               "title": {
                 "title": "Title",
@@ -517,8 +513,7 @@
               "name": {
                 "title": "Name",
                 "description": "A name for this field.",
-                "type": "string",
-                "pattern": "^[a-z_]+$"
+                "type": "string"
               },
               "title": {
                 "title": "Title",
@@ -600,8 +595,7 @@
               "name": {
                 "title": "Name",
                 "description": "A name for this field.",
-                "type": "string",
-                "pattern": "^[a-z_]+$"
+                "type": "string"
               },
               "title": {
                 "title": "Title",
@@ -709,8 +703,7 @@
               "name": {
                 "title": "Name",
                 "description": "A name for this field.",
-                "type": "string",
-                "pattern": "^[a-z_]+$"
+                "type": "string"
               },
               "title": {
                 "title": "Title",
@@ -792,8 +785,7 @@
               "name": {
                 "title": "Name",
                 "description": "A name for this field.",
-                "type": "string",
-                "pattern": "^[a-z_]+$"
+                "type": "string"
               },
               "title": {
                 "title": "Title",
@@ -880,8 +872,7 @@
               "name": {
                 "title": "Name",
                 "description": "A name for this field.",
-                "type": "string",
-                "pattern": "^[a-z_]+$"
+                "type": "string"
               },
               "title": {
                 "title": "Title",
@@ -976,8 +967,7 @@
               "name": {
                 "title": "Name",
                 "description": "A name for this field.",
-                "type": "string",
-                "pattern": "^[a-z_]+$"
+                "type": "string"
               },
               "title": {
                 "title": "Title",
@@ -1077,8 +1067,7 @@
               "name": {
                 "title": "Name",
                 "description": "A name for this field.",
-                "type": "string",
-                "pattern": "^[a-z_]+$"
+                "type": "string"
               },
               "title": {
                 "title": "Title",
@@ -1175,8 +1164,7 @@
               "name": {
                 "title": "Name",
                 "description": "A name for this field.",
-                "type": "string",
-                "pattern": "^[a-z_]+$"
+                "type": "string"
               },
               "title": {
                 "title": "Title",
@@ -1272,8 +1260,7 @@
               "name": {
                 "title": "Name",
                 "description": "A name for this field.",
-                "type": "string",
-                "pattern": "^[a-z_]+$"
+                "type": "string"
               },
               "title": {
                 "title": "Title",
@@ -1354,8 +1341,7 @@
               "name": {
                 "title": "Name",
                 "description": "A name for this field.",
-                "type": "string",
-                "pattern": "^[a-z_]+$"
+                "type": "string"
               },
               "title": {
                 "title": "Title",

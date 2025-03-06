@@ -19,6 +19,7 @@ __all__ = ["SchemaManager"]
 
 
 BASE_SCHEMA = Path(__file__).parent / "meta_schemas" / "frictionlessv1.json"
+SWEET_EXTENSIONS = [Path(__file__).parent / "meta_schemas" / "sweet_metastandard.yaml"]
 
 
 @event.listens_for(Engine, "connect")  # type: ignore
@@ -106,22 +107,33 @@ class SchemaManager:
     def __init__(
         self,
         fn_db: str | None = None,
-        meta_schema_base: str | Path | dict[str, Any] | None = None,
+        metaschema_base: str | Path | dict[str, Any] | None = None,
+        metaschema_extensions: list[str | Path | dict[str, Any]] | None = None,
     ) -> None:
         """Initialize the database engine and session factory
         Args:
             fn (str | None): Filename of the sqlite database
                 Defaults to None, which uses an in-memory database
-            meta_schema_base (str | Schema | None): Metadata schema basis.
+            metaschema_base (str | Schema | None): Metadata schema basis.
                 Extensions of the meta-schema are imposed of this schema.
                 for the database. Defaults to None, which uses the default schema.
                 If a string is provided it is assumed to be a path to a schema file
                 in yaml format.
+                Default is None.
+            metaschema_extensions (list[str | Schema | None]): List of schema extensions
+                to the base schema. Defaults to None.
+                If a string is provided it is assumed to be a path to a schema file
+                in yaml format. Extensions are imposed on top of the base schema.
+                If None: the SWEET standard extensions are used.
+                If an empty list is passed no additional extensions are used.
+                Default is None.
         """
         # create the meta-data schema
-        # TODO allow for extensions of the base schema
-        meta_schema_base = meta_schema_base or BASE_SCHEMA
-        self._meta_schema: dict[str, Any] = read_schema_from_file(meta_schema_base)
+        metaschema_base = metaschema_base or BASE_SCHEMA
+        if metaschema_extensions is None:
+            metaschema_extensions = SWEET_EXTENSIONS
+        schemas = [metaschema_base] + metaschema_extensions
+        self._metaschema: dict[str, Any] = self._combine_metaschemas(schemas)
 
         # self._meta_schema = self._create_schema_from_file(meta_schema)
         # create the engine and the tables
@@ -130,9 +142,32 @@ class SchemaManager:
 
         # check whether the meta-schema is in the database else create it
         try:
-            self._meta_schema = self[self.key_meta_schema]
+            self._metaschema = self[self.key_meta_schema]
         except KeyError:
-            self._write_schema_to_db(self.key_meta_schema, self._meta_schema)
+            self._write_schema_to_db(self.key_meta_schema, self._metaschema)
+
+    @staticmethod
+    def _combine_metaschemas(
+        schemas: list[str | Path | dict[str, Any]],
+    ) -> list[dict[str, Any]]:
+        """Combine a list of json schemas to a single schema
+
+        Args:
+            schemas (list[dict[str, Any]]): List of schemas to combine
+
+        Returns:
+            dict[str, Any]: Combined schema
+        """
+        schemas_ = [read_schema_from_file(schema) for schema in schemas]
+        combined_schema = {
+            "$schema": "http://json-schema.org/draft-07/schema#",
+            "title": "Combined metadata schema",
+            "allOf": [
+                {"$ref": f"#/definitions/schema{i}"} for i in range(len(schemas_))
+            ],
+            "definitions": {f"schema{i}": s for i, s in enumerate(schemas_)},
+        }
+        return combined_schema
 
     def _create_and_check_schema(
         self, schema: str | Path | dict[str, Any]
@@ -271,7 +306,7 @@ class SchemaManager:
         """
         if isinstance(schema, str | Path):
             schema = read_schema_from_file(schema)
-        jsonschema.validate(instance=schema, schema=self._meta_schema)
+        jsonschema.validate(instance=schema, schema=self._metaschema)
 
     def _write_schema_to_db(self, key: str, schema: dict[str, Any]) -> None:
         """Write a schema to the database
