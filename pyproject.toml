@@ -25,6 +25,7 @@ dev = [
     "pytest>=8.3.4",
     "ipykernel>=6.29.5",
     "pandera[io,mypy]>=0.22.1",
+    "faker>=36.2.2",
 ]
 docs = [
     "mkdocs-material>=9.6.2",

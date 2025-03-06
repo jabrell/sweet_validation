@@ -1,0 +1,56 @@
+# ----------------------------------------------------------------------------
+#                         TABLE DESCRIPTION
+# ----------------------------------------------------------------------------
+name: elec_gen_hourly
+title: Hourly electricity generation
+description: |
+  This table contains hourly electricity generation data for a power plant.
+
+# ----------------------------------------------------------------------------
+#                DESCRIPTION OF SPECIAL COLUMNS/FIELDS
+# ---------------------------------------------------------------------------
+valueField:
+  # note is single object (therefore no -)
+  field: value
+  unit: MWh
+timeFields:
+  # note that this is an array of objects (therefore the -)
+  - field: datetime
+    frequency: hourly
+locationFields:
+  # note that this is an array of objects (therefore the -)
+  - field: country
+    locationType: country
+
+# ----------------------------------------------------------------------------
+#                DATA DISCOVERY AND ONTOLOGY INFORMATION
+# ----------------------------------------------------------------------------
+tags:
+  - electricity
+  - generation
+  - hourly
+  - power plant
+
+# ----------------------------------------------------------------------------
+#                  FRICTIONLESS FIELDS/COLUMNS
+# ----------------------------------------------------------------------------
+fields:
+  - name: country
+    title: Country
+    description: Name of the country in which generation takes place
+    type: string
+    constraints:
+      required: true
+  - name: datetime
+    title: Datetime
+    description: End of hour in which generation took place in UTC time
+    type: datetime
+    constraints:
+      required: true
+  - name: value
+    title: Generation
+    description: Amount of electricity generated
+    type: number
+    constraints:
+      required: true
+      minimum: 0
