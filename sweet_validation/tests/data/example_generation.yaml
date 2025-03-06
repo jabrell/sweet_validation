@@ -10,6 +10,9 @@ description: |
 #                DESCRIPTION OF SPECIAL COLUMNS/FIELDS
 # ---------------------------------------------------------------------------
 valueField:
+  # note that by settings this, it is assumed that this is the only value field
+  # all other fields are assumed to be indexes that are jointly unique (like a
+  # primary key)
   # note is single object (therefore no -)
   field: value
   unit: MWh
@@ -26,6 +29,7 @@ locationFields:
 #                DATA DISCOVERY AND ONTOLOGY INFORMATION
 # ----------------------------------------------------------------------------
 tags:
+  # note that this is an array of objects (therefore the -)
   - electricity
   - generation
   - hourly
@@ -34,6 +38,11 @@ tags:
 # ----------------------------------------------------------------------------
 #                  FRICTIONLESS FIELDS/COLUMNS
 # ----------------------------------------------------------------------------
+foreignKeys:
+  - fields: country
+    reference:
+      resource: country_classifications
+      fields: country
 fields:
   - name: country
     title: Country
