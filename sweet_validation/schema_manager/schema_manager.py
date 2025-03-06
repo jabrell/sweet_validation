@@ -106,20 +106,22 @@ class SchemaManager:
     def __init__(
         self,
         fn_db: str | None = None,
-        meta_schema: str | Path | dict[str, Any] | None = None,
+        meta_schema_base: str | Path | dict[str, Any] | None = None,
     ) -> None:
         """Initialize the database engine and session factory
         Args:
             fn (str | None): Filename of the sqlite database
                 Defaults to None, which uses an in-memory database
-            meta_schema (str | Schema | None): Metadata schema for the database
-                Defaults to None, which uses the default schema. If a string is
-                provided it is assumed to be a path to a schema file in yaml format.
+            meta_schema_base (str | Schema | None): Metadata schema basis.
+                Extensions of the meta-schema are imposed of this schema.
+                for the database. Defaults to None, which uses the default schema.
+                If a string is provided it is assumed to be a path to a schema file
+                in yaml format.
         """
         # create the meta-data schema
         # TODO allow for extensions of the base schema
-        meta_schema = meta_schema or BASE_SCHEMA
-        self._meta_schema: dict[str, Any] = read_schema_from_file(meta_schema)
+        meta_schema_base = meta_schema_base or BASE_SCHEMA
+        self._meta_schema: dict[str, Any] = read_schema_from_file(meta_schema_base)
 
         # self._meta_schema = self._create_schema_from_file(meta_schema)
         # create the engine and the tables
