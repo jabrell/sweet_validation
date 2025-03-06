@@ -19,7 +19,9 @@ __all__ = ["SchemaManager"]
 
 
 BASE_SCHEMA = Path(__file__).parent / "meta_schemas" / "frictionlessv1.json"
-SWEET_EXTENSIONS = [Path(__file__).parent / "meta_schemas" / "sweet_metastandard.yaml"]
+SWEET_EXTENSIONS: list[str | Path | dict[str, Any]] | None = [
+    Path(__file__).parent / "meta_schemas" / "sweet_metastandard.yaml"
+]
 
 
 @event.listens_for(Engine, "connect")  # type: ignore
