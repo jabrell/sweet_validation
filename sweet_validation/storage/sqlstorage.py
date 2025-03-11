@@ -20,6 +20,26 @@ map_db_types = {
     }
 }
 
+# a complete list of frictionless types can be found here:
+# frictionless_data_types = [
+#     "any",
+#     "boolean",
+#     "date",
+#     "datetime",
+#     "integer",
+#     "number",
+#     "string",
+#     "time",
+#     "year",
+
+#     "yearmonth",
+#     "duration",
+#     "object",
+#     "array",
+#     "geopoint",
+#     "geojson",
+# ]
+
 
 class SqlStorage:
     """The SQL storage uses a database to store the data."""
@@ -37,7 +57,6 @@ class SqlStorage:
         with self._engine.connect() as conn:
             self.metadata.reflect(conn)
         self.Session = sessionmaker(bind=self._engine)
-        self.metadata.create_all(self._engine)
 
     @property
     def tables(self) -> list[str]:
@@ -69,27 +88,39 @@ class SqlStorage:
             raise ValueError(f"Table '{tbl_name}' already exists")
 
         # create columns
-        # TODO include constraints here
-        db_types = map_db_types[self._engine.dialect.name]
-        cols = []
-        for field in fields:
-            name = field.get("name")
-            if not name:
-                raise ValueError("Each field must have a 'name' key")
-            type_ = field.get("type")
-            if not type_:
-                raise ValueError(f"The field '{name}' must have a 'type' key")
-            db_type = db_types.get(type_)
-            if not db_type:
-                raise ValueError(
-                    f"Type '{type_}' not supported by database flavor '{self._engine.dialect.name}'"  # noqa
-                )
-            cols.append(Column(name=name, type_=db_type))
+        cols = [self._create_column(field) for field in fields]
 
         # create the table object
         table = Table(tbl_name, self.metadata, *cols)
-        with self._engine.begin() as conn:
-            self.metadata.create_all(conn, tables=[table])
+        with self.Session() as session:
+            self.metadata.create_all(session.bind, tables=[table])
+
+    def _create_column(self, field: dict[str, Any]) -> Column:
+        """Create a column from a dictionary with a frictionless field description.
+
+        Args:
+            field: The field description in frictionless format.
+
+        Returns:
+            The created column.
+
+        Raises:
+            ValueError: If the column does not have a "name" key or a "type" key.
+        """
+        # TODO include constraints here
+        db_types = map_db_types[self._engine.dialect.name]
+        name = field.get("name")
+        if not name:
+            raise ValueError("Each field must have a 'name' key")
+        type_ = field.get("type")
+        if not type_:
+            raise ValueError(f"The field '{name}' must have a 'type' key")
+        db_type = db_types.get(type_)
+        if not db_type:
+            raise ValueError(
+                f"Type '{type_}' not supported by database flavor '{self._engine.dialect.name}'"  # noqa
+            )
+        return Column(name=name, type_=db_type)
 
     def delete_table(self, table_name: str) -> None:
         """Delete a table from the database.
@@ -100,8 +131,8 @@ class SqlStorage:
         if table_name not in self.tables:
             raise ValueError(f"Table '{table_name}' does not exist")
         table = self.metadata.tables[table_name]
-        with self._engine.begin() as conn:
-            self.metadata.drop_all(conn, tables=[table])
+        with self.Session() as session:
+            table.drop(session.bind)
             self.metadata.remove(table)
 
     def _close_engine(self) -> None:
