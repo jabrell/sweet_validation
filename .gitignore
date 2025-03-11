@@ -5,6 +5,7 @@ __pycache__/
 # only needed for explorations
 _jab_*
 /_tmp*
+test.db
 
 # C extensions
 *.so
